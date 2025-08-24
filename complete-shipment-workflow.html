@@ -1,0 +1,210 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Shipment Workflow</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .container { background: #f8fafc; padding: 30px; border-radius: 12px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; }
+        button { background: #2563eb; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; }
+        button:hover { background: #1d4ed8; }
+        .result { margin-top: 20px; padding: 15px; border-radius: 6px; }
+        .success { background: #dcfce7; border: 1px solid #16a34a; color: #15803d; }
+        .error { background: #fef2f2; border: 1px solid #dc2626; color: #dc2626; }
+        .step { margin: 20px 0; padding: 15px; background: white; border-radius: 8px; border-left: 4px solid #3b82f6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Complete Shipment Workflow</h1>
+        <p>Complete the shipping process for orders where automatic workflow failed</p>
+        
+        <div class="step">
+            <h3>Step 1: Assign AWB</h3>
+            <div class="form-group">
+                <label for="shipmentId">Shipment ID:</label>
+                <input type="text" id="shipmentId" value="929333039" placeholder="Enter Shipment ID">
+            </div>
+            
+            <div class="form-group">
+                <label for="courierId">Courier Company:</label>
+                <select id="courierId">
+                    <option value="">Select Courier</option>
+                    <option value="1">BlueDart</option>
+                    <option value="2">Delhivery</option>
+                    <option value="5">DTDC</option>
+                    <option value="12">Ecom Express</option>
+                    <option value="15">Xpressbees</option>
+                </select>
+            </div>
+            
+            <button onclick="assignAWB()">Assign AWB</button>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Schedule Pickup</h3>
+            <button onclick="schedulePickup()">Schedule Pickup</button>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Generate Label</h3>
+            <button onclick="generateLabel()">Generate Shipping Label</button>
+        </div>
+
+        <div class="step">
+            <h3>Step 4: Track Order</h3>
+            <div class="form-group">
+                <label for="trackingId">Tracking ID (AWB/Shipment ID):</label>
+                <input type="text" id="trackingId" placeholder="Enter AWB or Shipment ID">
+            </div>
+            <button onclick="trackOrder()">Track Order</button>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function showResult(message, isSuccess = true) {
+            const result = document.getElementById('result');
+            result.className = `result ${isSuccess ? 'success' : 'error'}`;
+            result.innerHTML = message;
+        }
+
+        async function assignAWB() {
+            const shipmentId = document.getElementById('shipmentId').value;
+            const courierId = document.getElementById('courierId').value;
+            
+            if (!shipmentId || !courierId) {
+                showResult('Please fill in both Shipment ID and select a Courier', false);
+                return;
+            }
+
+            try {
+                showResult('Assigning AWB...', true);
+                
+                const response = await fetch('/.netlify/functions/shiprocket-generate-awb', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        shipment_id: shipmentId,
+                        courier_id: courierId
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showResult(`✅ AWB Assigned Successfully!<br>
+                               <strong>AWB Code:</strong> ${result.data.awb_code}<br>
+                               <strong>Courier:</strong> ${result.data.courier_name}<br>
+                               Now proceed to Step 2: Schedule Pickup`, true);
+                } else {
+                    showResult(`❌ Failed to assign AWB: ${result.error}`, false);
+                }
+                
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, false);
+            }
+        }
+
+        async function schedulePickup() {
+            const shipmentId = document.getElementById('shipmentId').value;
+            
+            if (!shipmentId) {
+                showResult('Please enter Shipment ID', false);
+                return;
+            }
+
+            try {
+                showResult('Scheduling pickup...', true);
+                
+                const response = await fetch('/.netlify/functions/shiprocket-schedule-pickup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ shipment_id: shipmentId })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showResult(`✅ Pickup Scheduled Successfully!<br>
+                               Pickup will be arranged by the courier company.<br>
+                               Now proceed to Step 3: Generate Label`, true);
+                } else {
+                    showResult(`❌ Failed to schedule pickup: ${result.error}`, false);
+                }
+                
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, false);
+            }
+        }
+
+        async function generateLabel() {
+            const shipmentId = document.getElementById('shipmentId').value;
+            
+            if (!shipmentId) {
+                showResult('Please enter Shipment ID', false);
+                return;
+            }
+
+            try {
+                showResult('Generating shipping label...', true);
+                
+                const response = await fetch('/.netlify/functions/shiprocket-generate-label', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ shipment_id: shipmentId })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showResult(`✅ Shipping Label Generated Successfully!<br>
+                               <strong>Label URL:</strong> <a href="${result.data.label_url}" target="_blank">Download Label</a><br>
+                               🎉 Shipment workflow completed!`, true);
+                } else {
+                    showResult(`❌ Failed to generate label: ${result.error}`, false);
+                }
+                
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, false);
+            }
+        }
+
+        async function trackOrder() {
+            const trackingId = document.getElementById('trackingId').value;
+            
+            if (!trackingId) {
+                showResult('Please enter a tracking ID', false);
+                return;
+            }
+
+            try {
+                showResult('Tracking order...', true);
+                
+                const response = await fetch(`/.netlify/functions/shiprocket-track-order/${trackingId}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const trackData = result.data.tracking_data;
+                    showResult(`📍 Order Tracking Information:<br>
+                               <strong>Status:</strong> ${trackData.shipment_status}<br>
+                               <strong>Current Location:</strong> ${trackData.current_status}<br>
+                               <strong>AWB:</strong> ${trackData.awb_code || 'N/A'}<br>
+                               <strong>Last Update:</strong> ${new Date(trackData.shipment_track?.[0]?.date).toLocaleString()}`, true);
+                } else {
+                    showResult(`❌ Tracking failed: ${result.error}`, false);
+                }
+                
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, false);
+            }
+        }
+    </script>
+</body>
+</html>

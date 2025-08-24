@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Shiprocket Integration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            padding: 40px 0;
+        }
+        .test-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .test-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        .test-result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .test-result.success {
+            background-color: #dcfce7;
+            border-color: #16a34a;
+            color: #166534;
+        }
+        .test-result.error {
+            background-color: #fef2f2;
+            border-color: #dc2626;
+            color: #991b1b;
+        }
+        .test-result.loading {
+            background-color: #fef3c7;
+            border-color: #f59e0b;
+            color: #92400e;
+        }
+        .btn-test {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .btn-test:hover {
+            background: #1d4ed8;
+        }
+        .btn-test:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        pre {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1><i class="fas fa-flask"></i> Shiprocket Integration Test</h1>
+        <p class="text-muted">Test your Shiprocket integration in development mode</p>
+
+        <!-- Connection Test -->
+        <div class="test-card">
+            <h3><i class="fas fa-plug"></i> 1. Connection Test</h3>
+            <p>Test if the Shiprocket API connection is working with your credentials.</p>
+            <button class="btn-test" onclick="testConnection()">Test Connection</button>
+            <div id="connectionResult" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Account Diagnostics -->
+        <div class="test-card">
+            <h3><i class="fas fa-stethoscope"></i> 1.5. Account Diagnostics</h3>
+            <p>Check account setup, pickup locations, and serviceability to diagnose issues.</p>
+            <button class="btn-test" onclick="runDiagnostics()">Run Full Diagnostics</button>
+            <div id="diagnosticsResult" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Create Order Test -->
+        <div class="test-card">
+            <h3><i class="fas fa-shopping-cart"></i> 2. Create Test Order</h3>
+            <p>Create a test shipment to verify the order creation flow.</p>
+            <button class="btn-test" onclick="createTestOrder()">Create Test Shipment</button>
+            <div id="orderResult" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Track Order Test -->
+        <div class="test-card">
+            <h3><i class="fas fa-search"></i> 3. Track Order Test</h3>
+            <p>Test order tracking functionality.</p>
+            <div class="mb-3">
+                <label for="trackingInput" class="form-label">Enter Order ID or AWB Number:</label>
+                <input type="text" class="form-control" id="trackingInput" 
+                       placeholder="Enter tracking number (e.g., TEST123)" value="TEST123">
+            </div>
+            <button class="btn-test" onclick="testTracking()">Test Tracking</button>
+            <div id="trackingResult" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Complete Workflow Test -->
+        <div class="test-card">
+            <h3><i class="fas fa-rocket"></i> 4. Complete Automated Workflow Test</h3>
+            <p><strong>🚀 Full End-to-End Process:</strong> Order → AWB → Pickup → Label → Ready for shipping</p>
+            <div class="alert alert-info mb-3">
+                <i class="fas fa-info-circle"></i>
+                This tests the complete automated workflow that will run for every real customer order.
+            </div>
+            <button class="btn-test" onclick="testCompleteWorkflow()">Test Complete Workflow</button>
+            <div id="workflowResult" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Verification Section -->
+        <div class="test-card">
+            <h3><i class="fas fa-question-circle"></i> Verify Real vs. Demo IDs</h3>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 20px;">
+                <h4>How to verify if your IDs are real:</h4>
+                <ul>
+                    <li><strong>Real Shipment ID:</strong> Typically an 8-digit number (e.g., 12345678).</li>
+                    <li><strong>Demo Shipment ID:</strong> Often contains "demo", "test", or looks like random alphanumeric strings.</li>
+                    <li><strong>Check Shiprocket Dashboard:</strong> Login to your <a href="https://app.shiprocket.in/orders" target="_blank">Shiprocket Dashboard</a>. Real orders will appear in your account under "Orders". Demo orders will not.</li>
+                    <li><strong>AWB Codes:</strong> Real AWB codes are usually 10-15 alphanumeric characters. Demo codes are often generic like "TEST123XYZ".</li>
+                </ul>
+            </div>
+            <p>Click the button below to create a test shipment and see if it appears in your Shiprocket dashboard.</p>
+            <button class="btn-test" onclick="createTestShipment()" id="shipmentBtn">Create Test Shipment</button>
+            <div id="testResult" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- API Endpoints Overview -->
+        <div class="test-card">
+            <h3><i class="fas fa-code"></i> Available API Endpoints</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Core Functions:</h6>
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <code>GET /.netlify/functions/shiprocket-test-connection</code>
+                            <span class="badge bg-success">Test credentials</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <code>POST /.netlify/functions/shiprocket-create-order</code>
+                            <span class="badge bg-primary">Complete automated workflow</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <code>GET /.netlify/functions/shiprocket-track/{id}</code>
+                            <span class="badge bg-info">Track order</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <code>GET /.netlify/functions/shiprocket-diagnose</code>
+                            <span class="badge bg-warning">Account diagnostics</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6>Manual Controls:</h6>
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <code>POST /.netlify/functions/shiprocket-assign-awb</code>
+                            <span class="badge bg-secondary">Manual AWB</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <code>POST /.netlify/functions/shiprocket-schedule-pickup</code>
+                            <span class="badge bg-secondary">Manual pickup</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <code>POST /.netlify/functions/shiprocket-generate-label</code>
+                            <span class="badge bg-secondary">Generate labels</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <code>POST /.netlify/functions/shiprocket-generate-manifest</code>
+                            <span class="badge bg-secondary">Generate manifest</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="test-card">
+            <h3><i class="fas fa-link"></i> Quick Links</h3>
+            <div class="d-flex gap-2">
+                <a href="track-order.html" class="btn btn-outline-primary">
+                    <i class="fas fa-truck"></i> Order Tracking Page
+                </a>
+                <a href="admin-professional-final.html" class="btn btn-outline-secondary">
+                    <i class="fas fa-cog"></i> Admin Panel
+                </a>
+                <a href="index.html" class="btn btn-outline-success">
+                    <i class="fas fa-home"></i> Back to Website
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Test connection
+        async function testConnection() {
+            const button = event.target;
+            const resultDiv = document.getElementById('connectionResult');
+
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'test-result loading';
+            resultDiv.innerHTML = '<i class="fas fa-clock"></i> Connecting to Shiprocket API...';
+
+            try {
+                const response = await fetch('/.netlify/functions/shiprocket-test-connection');
+                const result = await response.json();
+
+                if (result.success) {
+                    resultDiv.className = 'test-result success';
+                    resultDiv.innerHTML = `
+                        <h5><i class="fas fa-check-circle"></i> Connection Successful</h5>
+                        <p>${result.message}</p>
+                        <small>Test Mode: ${result.test_mode ? 'Enabled' : 'Disabled'}</small>
+                    `;
+                } else {
+                    throw new Error(result.error || 'Connection failed');
+                }
+            } catch (error) {
+                resultDiv.className = 'test-result error';
+                resultDiv.innerHTML = `
+                    <h5><i class="fas fa-exclamation-triangle"></i> Connection Failed</h5>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <small>Check your credentials in the Replit Secrets.</small>
+                `;
+            } finally {
+                button.disabled = false;
+                button.innerHTML = 'Test Connection';
+            }
+        }
+
+        // Run diagnostics
+        async function runDiagnostics() {
+            const button = event.target;
+            const resultDiv = document.getElementById('diagnosticsResult');
+
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'test-result loading';
+            resultDiv.innerHTML = '<i class="fas fa-clock"></i> Running account diagnostics...';
+
+            try {
+                const response = await fetch('/.netlify/functions/shiprocket-diagnose');
+                const result = await response.json();
+
+                if (result.success) {
+                    const diagnostics = result.diagnostics;
+
+                    resultDiv.className = 'test-result success';
+                    resultDiv.innerHTML = `
+                        <h5><i class="fas fa-check-circle"></i> Diagnostics Complete</h5>
+
+                        <div style="margin: 1rem 0;">
+                            <h6>🔐 Authentication</h6>
+                            <p>${diagnostics.authentication}</p>
+                        </div>
+
+                        <div style="margin: 1rem 0;">
+                            <h6>📍 Pickup Locations</h6>
+                            <p>Found ${diagnostics.pickup_count} pickup location(s)</p>
+                            ${diagnostics.pickup_count === 0 ? 
+                                '<div class="alert alert-warning" style="margin-top: 0.5rem; padding: 0.5rem; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px;"><strong>⚠️ Issue Found:</strong> No pickup locations configured. Please add a pickup address in your Shiprocket panel under Settings → Company Profile → Pickup Address.</div>' : 
+                                ''
+                            }
+                        </div>
+
+                        <div style="margin: 1rem 0;">
+                            <h6>🚚 Serviceability Test</h6>
+                            <p>${diagnostics.serviceability_test}</p>
+                            <p>Available couriers: ${diagnostics.available_couriers}</p>
+                        </div>
+
+                        <details style="margin-top: 1rem;">
+                            <summary>Full Diagnostic Data</summary>
+                            <pre>${JSON.stringify(diagnostics, null, 2)}</pre>
+                        </details>
+                    `;
+                } else {
+                    throw new Error(result.error || 'Diagnostics failed');
+                }
+            } catch (error) {
+                resultDiv.className = 'test-result error';
+                resultDiv.innerHTML = `
+                    <h5><i class="fas fa-exclamation-triangle"></i> Diagnostics Failed</h5>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                `;
+            } finally {
+                button.disabled = false;
+                button.innerHTML = 'Run Full Diagnostics';
+            }
+        }
+
+        // Create test order
+        async function createTestOrder() {
+            const button = event.target;
+            const resultDiv = document.getElementById('orderResult');
+
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'test-result loading';
+            resultDiv.innerHTML = '<i class="fas fa-clock"></i> Creating test shipment...';
+
+            const testOrderData = {
+                order_id: 'TEST-' + Date.now(),
+                order_date: new Date().toISOString().split('T')[0],
+                customer: {
+                    firstName: 'Test',
+                    lastName: 'Customer',
+                    email: 'test@example.com',
+                    phone: '9876543210',
+                    address: '123 Test Street, Test Area',
+                    city: 'Mumbai',
+                    state: 'Maharashtra',
+                    pinCode: '400001'
+                },
+                items: [{
+                    id: 'TEST-ITEM-001',
+                    name: 'Test Jewelry Item',
+                    price: 1500,
+                    quantity: 1
+                }],
+                total: 1500,
+                payment_method: 'Prepaid'
+            };
+
+            try {
+                const response = await fetch('/.netlify/functions/shiprocket-create-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testOrderData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    resultDiv.className = 'test-result success';
+                    resultDiv.innerHTML = `
+                        <h5><i class="fas fa-check-circle"></i> Test Shipment Created</h5>
+                        <p><strong>Order ID:</strong> ${result.data.order_id || 'N/A'}</p>
+                        <p><strong>Shipment ID:</strong> ${result.data.shipment_id || 'N/A'}</p>
+                        <details>
+                            <summary>Full Response</summary>
+                            <pre>${JSON.stringify(result.data, null, 2)}</pre>
+                        </details>
+                    `;
+                } else {
+                    throw new Error(result.error || 'Order creation failed');
+                }
+            } catch (error) {
+                resultDiv.className = 'test-result error';
+                resultDiv.innerHTML = `
+                    <h5><i class="fas fa-exclamation-triangle"></i> Order Creation Failed</h5>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <small>This might be expected in test mode if your account doesn't have full API access.</small>
+                `;
+            } finally {
+                button.disabled = false;
+                button.innerHTML = 'Create Test Shipment';
+            }
+        }
+
+        // Create test shipment for verification
+        async function createTestShipment() {
+            const button = document.getElementById('shipmentBtn');
+            const resultDiv = document.getElementById('testResult');
+
+            button.disabled = true;
+            button.textContent = 'Creating Test Shipment...';
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'test-result loading';
+            resultDiv.innerHTML = '<i class="fas fa-clock"></i> Creating test shipment to verify real IDs...';
+
+            const testOrder = {
+                order_id: `VERIFY-${Date.now()}`,
+                order_date: new Date().toISOString().split('T')[0],
+                customer: {
+                    firstName: 'Test',
+                    lastName: 'Customer',
+                    phone: '9876543210',
+                    email: 'test@example.com',
+                    address: 'Test Address',
+                    city: 'Mumbai',
+                    state: 'Maharashtra',
+                    pinCode: '400001'
+                },
+                items: [{
+                    name: 'Test Product',
+                    id: 'TEST001',
+                    quantity: 1,
+                    price: 100
+                }],
+                total: 100,
+                payment_method: 'Prepaid' // Assuming prepaid for test
+            };
+
+            try {
+                const response = await fetch('/.netlify/functions/shiprocket-create-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testOrder)
+                });
+
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    const shipmentId = result.data.shipment_id;
+                    // A simple check: real shipment IDs are usually numeric and have a certain length.
+                    const isRealId = shipmentId && !isNaN(shipmentId) && shipmentId.toString().length >= 8;
+
+                    resultDiv.className = 'test-result'; // Reset class
+                    resultDiv.innerHTML = `
+                        <div style="padding: 15px; border-radius: 5px; ${isRealId ? 'background: #d4edda; border-left: 4px solid #28a745;' : 'background: #fff3cd; border-left: 4px solid #ffc107;'}">
+                            <h4>${isRealId ? '✅ REAL Shiprocket Integration!' : '⚠️ Possible Demo/Test Mode'}</h4>
+                            <p><strong>Shipment ID:</strong> ${shipmentId || 'N/A'}</p>
+                            <p><strong>Order ID:</strong> ${result.data.order_id || 'N/A'}</p>
+                            <p><strong>Status:</strong> ${result.data.status || 'N/A'}</p>
+                            ${result.data.awb_code ? `<p><strong>AWB Code:</strong> ${result.data.awb_code}</p>` : ''}
+
+                            ${isRealId ? `
+                                <div style="background: #e8f5e8; padding: 10px; border-radius: 4px; margin-top: 10px;">
+                                    <strong>🎉 Your integration is working with REAL Shiprocket API!</strong><br>
+                                    - Check your <a href="https://app.shiprocket.in/orders" target="_blank">Shiprocket Dashboard</a><br>
+                                    - This order should appear in your real account<br>
+                                    - You're getting genuine shipment IDs from Shiprocket
+                                </div>
+                            ` : `
+                                <div style="background: #fff3e0; padding: 10px; border-radius: 4px; margin-top: 10px;">
+                                    <strong>⚠️ This might be demo data</strong><br>
+                                    - Check if your Shiprocket credentials are correct.<br>
+                                    - Verify you're using production credentials, not test ones.<br>
+                                    - Ensure your Shiprocket account is not in demo mode.
+                                </div>
+                            `}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.className = 'test-result error';
+                    resultDiv.innerHTML = `
+                        <div style="padding: 15px; background: #f8d7da; border-left: 4px solid #dc3545; border-radius: 5px;">
+                            <h4>❌ Shipment Creation Failed</h4>
+                            <p><strong>Error:</strong> ${result.error || 'Unknown error'}</p>
+                            <p>This indicates your credentials might not be set up correctly or the API call failed.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.className = 'test-result error';
+                resultDiv.innerHTML = `
+                    <div style="padding: 15px; background: #f8d7da; border-left: 4px solid #dc3545; border-radius: 5px;">
+                        <h4>❌ Connection Error</h4>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p>Could not connect to the Shiprocket API. Check your network connection and API endpoint.</p>
+                    </div>
+                `;
+            }
+
+            button.disabled = false;
+            button.textContent = 'Create Test Shipment';
+        }
+
+        // Test complete automated workflow
+        async function testCompleteWorkflow() {
+            const button = event.target;
+            const resultDiv = document.getElementById('workflowResult');
+
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running Complete Workflow...';
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'test-result loading';
+            resultDiv.innerHTML = '<i class="fas fa-clock"></i> Starting complete automated workflow...<br><small>This includes: Order → AWB → Pickup → Label generation</small>';
+
+            const testOrderData = {
+                order_id: 'WORKFLOW-TEST-' + Date.now(),
+                order_date: new Date().toISOString().split('T')[0],
+                customer: {
+                    firstName: 'WorkflowTest',
+                    lastName: 'Customer',
+                    email: 'workflow@example.com',
+                    phone: '9876543210',
+                    address: '123 Workflow Street, Test Area',
+                    city: 'Mumbai',
+                    state: 'Maharashtra',
+                    pinCode: '400001'
+                },
+                items: [{
+                    id: 'WORKFLOW-ITEM-001',
+                    name: 'Complete Workflow Test Item',
+                    price: 2500,
+                    quantity: 1
+                }],
+                total: 2500,
+                payment_method: 'Prepaid'
+            };
+
+            try {
+                const response = await fetch('/.netlify/functions/shiprocket-create-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testOrderData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    const workflowData = result.data;
+
+                    resultDiv.className = 'test-result success';
+
+                    // Check if workflow completed successfully
+                    if (workflowData.workflow_completed) {
+                        resultDiv.innerHTML = `
+                            <h5><i class="fas fa-check-circle"></i> ✅ Complete Workflow Successful!</h5>
+
+                            <div class="workflow-steps" style="margin: 1.5rem 0;">
+                                <div class="step-item" style="padding: 0.5rem; margin: 0.5rem 0; background: #e8f5e8; border-left: 4px solid #28a745; border-radius: 4px;">
+                                    <strong>1. ✅ Order Created</strong><br>
+                                    <small>Order ID: ${workflowData.order_id} | Shipment ID: ${workflowData.shipment_id}</small>
+                                </div>
+
+                                <div class="step-item" style="padding: 0.5rem; margin: 0.5rem 0; background: #e8f5e8; border-left: 4px solid #28a745; border-radius: 4px;">
+                                    <strong>2. ✅ AWB Generated</strong><br>
+                                    <small>AWB Code: ${workflowData.awb_data?.awb_code || 'Generated'}</small>
+                                </div>
+
+                                <div class="step-item" style="padding: 0.5rem; margin: 0.5rem 0; background: #e8f5e8; border-left: 4px solid #28a745; border-radius: 4px;">
+                                    <strong>3. ✅ Pickup Scheduled</strong><br>
+                                    <small>Pickup Request: Submitted</small>
+                                </div>
+
+                                <div class="step-item" style="padding: 0.5rem; margin: 0.5rem 0; background: #e8f5e8; border-left: 4px solid #28a745; border-radius: 4px;">
+                                    <strong>4. ✅ Shipping Label Generated</strong><br>
+                                    <small>Label: Ready for download</small>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-success" style="margin: 1rem 0; padding: 1rem; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px;">
+                                <strong>🎉 SUCCESS!</strong> Your automated workflow is working perfectly. 
+                                Every customer order will now automatically:
+                                <ul style="margin: 0.5rem 0 0 1rem;">
+                                    <li>Create shipment</li>
+                                    <li>Assign courier & AWB number</li>
+                                    <li>Schedule pickup</li>
+                                    <li>Generate shipping labels</li>
+                                </ul>
+                            </div>
+
+                            <details style="margin-top: 1rem;">
+                                <summary>Full Workflow Data</summary>
+                                <pre>${JSON.stringify(workflowData, null, 2)}</pre>
+                            </details>
+                        `;
+                    } else {
+                        // Partial success - order created but workflow incomplete
+                        resultDiv.className = 'test-result';
+                        resultDiv.style.background = '#fff3cd';
+                        resultDiv.style.borderColor = '#ffeaa7';
+                        resultDiv.innerHTML = `
+                            <h5><i class="fas fa-exclamation-triangle"></i> Order Created, Workflow Partially Complete</h5>
+                            <p><strong>Order ID:</strong> ${workflowData.order_id}</p>
+                            <p><strong>Shipment ID:</strong> ${workflowData.shipment_id}</p>
+                            <p><strong>Issue:</strong> ${workflowData.workflow_error || 'Automatic workflow completion failed'}</p>
+                            <p>You may need to complete AWB/Pickup steps manually via admin panel.</p>
+                            <details>
+                                <summary>Order Data</summary>
+                                <pre>${JSON.stringify(workflowData, null, 2)}</pre>
+                            </details>
+                        `;
+                    }
+                } else {
+                    throw new Error(result.error || 'Complete workflow failed');
+                }
+            } catch (error) {
+                resultDiv.className = 'test-result error';
+                resultDiv.innerHTML = `
+                    <h5><i class="fas fa-exclamation-triangle"></i> Complete Workflow Failed</h5>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <small>Check the console logs for detailed error information.</small>
+                `;
+            } finally {
+                button.disabled = false;
+                button.innerHTML = 'Test Complete Workflow';
+            }
+        }
+
+        // Test tracking
+        async function testTracking() {
+            const button = event.target;
+            const resultDiv = document.getElementById('trackingResult');
+            const trackingInput = document.getElementById('trackingInput');
+            const trackingId = trackingInput.value.trim();
+
+            if (!trackingId) {
+                alert('Please enter a tracking ID');
+                return;
+            }
+
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Tracking...';
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'test-result loading';
+            resultDiv.innerHTML = '<i class="fas fa-clock"></i> Fetching tracking information...';
+
+            try {
+                const response = await fetch(`/.netlify/functions/shiprocket-track-order/${trackingId}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const textResponse = await response.text();
+                    throw new Error(`Expected JSON but got: ${contentType}. Response: ${textResponse.substring(0, 200)}...`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    resultDiv.className = 'test-result success';
+                    resultDiv.innerHTML = `
+                        <h5><i class="fas fa-check-circle"></i> Tracking Successful</h5>
+                        <p><strong>Tracking ID:</strong> ${trackingId}</p>
+                        <details>
+                            <summary>Tracking Details</summary>
+                            <pre>${JSON.stringify(result.data, null, 2)}</pre>
+                        </details>
+                        <div style="margin-top: 15px;">
+                            <a href="track-order.html?tracking=${trackingId}" target="_blank" class="btn btn-sm btn-primary" style="margin-right: 10px;">View in Tracking Page</a>
+                            <a href="order-track.html" target="_blank" class="btn btn-sm btn-outline-primary">Try Main Tracking Page</a>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(result.error || 'Tracking failed');
+                }
+            } catch (error) {
+                console.error('Tracking error:', error);
+                resultDiv.className = 'test-result error';
+
+                let errorMessage = error.message;
+                let additionalInfo = '';
+
+                if (error.message.includes('HTTP 404')) {
+                    errorMessage = 'Tracking function not found or tracking ID not in system';
+                    additionalInfo = 'The tracking endpoint may not be properly deployed.';
+                } else if (error.message.includes('Expected JSON but got')) {
+                    errorMessage = 'Server returned HTML instead of JSON';
+                    additionalInfo = 'This usually means the function endpoint is not accessible.';
+                } else if (error.message.includes('Failed to fetch')) {
+                    errorMessage = 'Network error: Could not connect to server';
+                    additionalInfo = 'Check your internet connection.';
+                }
+
+                resultDiv.innerHTML = `
+                    <h5><i class="fas fa-exclamation-triangle"></i> Tracking Failed</h5>
+                    <p><strong>Error:</strong> ${errorMessage}</p>
+                    ${additionalInfo ? `<p><strong>Details:</strong> ${additionalInfo}</p>` : ''}
+                    <small>For TEST123 and other test IDs, this should normally work if the function is properly deployed.</small>
+                    <details style="margin-top: 10px;">
+                        <summary>Full Error Details</summary>
+                        <pre style="font-size: 11px; background: #f8f9fa; padding: 10px; border-radius: 4px; margin-top: 5px;">${error.message}</pre>
+                    </details>
+                `;
+            } finally {
+                button.disabled = false;
+                button.innerHTML = 'Test Tracking';
+            }
+        }
+    </script>
+</body>
+</html>

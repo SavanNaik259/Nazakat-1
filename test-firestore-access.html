@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firestore Access Test</title>
+</head>
+<body>
+    <h1>Testing Firestore Access</h1>
+    <div id="results"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
+            authDomain: "auric-a0c92.firebaseapp.com",
+            projectId: "auric-a0c92",
+            storageBucket: "auric-a0c92.appspot.com",
+            messagingSenderId: "869158319434",
+            appId: "1:869158319434:web:e8c27b3d4763b7b5c11d03"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        async function testFirestoreAccess() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Testing Firestore access...</p>';
+
+            try {
+                console.log('Testing unauthenticated access to users collection...');
+                const usersSnapshot = await db.collection('users').get();
+                console.log('✅ SUCCESS: Can access users collection without authentication');
+                console.log(`Found ${usersSnapshot.size} users`);
+                
+                resultsDiv.innerHTML += `<p style="color: green;">✅ SUCCESS: Can access users collection (${usersSnapshot.size} users found)</p>`;
+                
+                // Test orders access
+                let totalOrders = 0;
+                for (const userDoc of usersSnapshot.docs) {
+                    const ordersSnapshot = await userDoc.ref.collection('orders').get();
+                    totalOrders += ordersSnapshot.size;
+                }
+                
+                console.log(`✅ SUCCESS: Can access orders subcollections (${totalOrders} orders found)`);
+                resultsDiv.innerHTML += `<p style="color: green;">✅ SUCCESS: Can access orders (${totalOrders} orders found)</p>`;
+                
+            } catch (error) {
+                console.error('❌ ERROR:', error);
+                resultsDiv.innerHTML += `<p style="color: red;">❌ ERROR: ${error.message}</p>`;
+                resultsDiv.innerHTML += `<p style="color: red;">Error code: ${error.code}</p>`;
+            }
+        }
+
+        // Run test when page loads
+        window.onload = testFirestoreAccess;
+    </script>
+</body>
+</html>

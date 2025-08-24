@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auric Professional Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        /* Professional Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100vh;
+            background: #2563eb;
+            color: white;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            display: block;
+            padding: 12px 24px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .nav-item i {
+            width: 20px;
+            margin-right: 12px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            padding: 24px;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .header h1 {
+            color: #1e293b;
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 16px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .stat-number.orders { color: #2563eb; }
+        .stat-number.revenue { color: #059669; }
+        .stat-number.customers { color: #7c3aed; }
+        .stat-number.inventory { color: #dc2626; }
+
+        .stat-label {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        /* Sections */
+        .section {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .section h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            padding: 20px 24px;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        td {
+            font-size: 14px;
+            color: #374151;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn-success {
+            background: #059669;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #047857;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        /* Loading and Status */
+        .loading {
+            padding: 40px;
+            text-align: center;
+            color: #64748b;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-success { background: #059669; }
+        .status-loading { background: #f59e0b; animation: pulse 2s infinite; }
+        .status-error { background: #dc2626; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Content Areas */
+        .content-area {
+            display: none;
+        }
+
+        .content-area.active {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Mobile menu toggle */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="menu-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Professional Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-gem"></i> Auric Admin</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <button class="nav-item active" onclick="showContent('dashboard')">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </button>
+            <button class="nav-item" onclick="showContent('orders')">
+                <i class="fas fa-shopping-cart"></i> Orders
+            </button>
+            <button class="nav-item" onclick="showContent('customers')">
+                <i class="fas fa-users"></i> Customers
+            </button>
+            <button class="nav-item" onclick="window.open('admin-panel.html', '_blank')">
+                <i class="fas fa-plus"></i> Add Products
+            </button>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Dashboard Content -->
+        <div id="dashboard" class="content-area active">
+            <div class="header">
+                <h1>Professional Admin Dashboard</h1>
+                <p>Comprehensive business analytics and management</p>
+                <div id="connection-status">
+                    <span class="status-indicator status-loading"></span>
+                    <span id="status-text">Connecting to Firebase...</span>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number orders" id="total-orders">
+                        <div class="loading">Loading...</div>
+                    </div>
+                    <div class="stat-label">Total Orders</div>
+                    <div id="orders-change" style="font-size: 12px; margin-top: 4px; color: #64748b;"></div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-number revenue" id="total-revenue">
+                        <div class="loading">Loading...</div>
+                    </div>
+                    <div class="stat-label">Revenue</div>
+                    <div id="revenue-change" style="font-size: 12px; margin-top: 4px; color: #64748b;"></div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-number customers" id="total-customers">
+                        <div class="loading">Loading...</div>
+                    </div>
+                    <div class="stat-label">Customers</div>
+                    <div id="customers-change" style="font-size: 12px; margin-top: 4px; color: #64748b;"></div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-number inventory" id="inventory-value">
+                        <div class="loading">Loading...</div>
+                    </div>
+                    <div class="stat-label">Inventory Value</div>
+                    <div id="inventory-change" style="font-size: 12px; margin-top: 4px; color: #64748b;"></div>
+                </div>
+            </div>
+
+            <!-- New Orders Section -->
+            <div class="section">
+                <h2><i class="fas fa-bell"></i> New Orders (Pending Confirmation)</h2>
+                <div id="new-orders-loading" class="loading">Loading new orders...</div>
+                <div id="new-orders-error" style="display: none;"></div>
+                <div id="new-orders-table" style="display: none;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Contact</th>
+                                <th>Date</th>
+                                <th>Items</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="new-orders-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Recent Orders Section -->
+            <div class="section">
+                <h2><i class="fas fa-chart-bar"></i> Recent Orders</h2>
+                <div style="padding: 16px 24px; border-bottom: 1px solid #e2e8f0;">
+                    <button class="btn btn-secondary" id="view-all-orders">View All Orders</button>
+                    <button class="btn btn-primary" id="refresh-orders" style="margin-left: 8px;">Refresh Orders</button>
+                </div>
+                <div id="orders-loading" class="loading">Loading recent orders...</div>
+                <div id="orders-error" style="display: none;"></div>
+                <div id="orders-table" style="display: none;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Contact</th>
+                                <th>Date</th>
+                                <th>Items</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Content -->
+        <div id="orders" class="content-area">
+            <div class="header">
+                <h1>Order Management</h1>
+                <p>Manage all customer orders</p>
+            </div>
+            <!-- Orders content will be loaded here -->
+        </div>
+
+        <!-- Customers Content -->
+        <div id="customers" class="content-area">
+            <div class="header">
+                <h1>Customer Management</h1>
+                <p>Manage customer data and relationships</p>
+            </div>
+
+            <div class="section">
+                <h2><i class="fas fa-users"></i> Customer Database</h2>
+                <div id="customers-loading" class="loading">Loading customer data...</div>
+                <div id="customers-error" style="display: none;"></div>
+                <div id="customers-table" style="display: none;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Orders</th>
+                                <th>Total Spent</th>
+                                <th>Last Order</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customers-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script>
+        // Navigation functionality
+        function showContent(section) {
+            // Hide all content areas
+            document.querySelectorAll('.content-area').forEach(area => {
+                area.classList.remove('active');
+            });
+            
+            // Remove active class from nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected content
+            document.getElementById(section).classList.add('active');
+            
+            // Add active class to clicked nav item
+            event.target.classList.add('active');
+            
+            // Load specific content
+            if (section === 'customers') {
+                loadCustomers();
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // Initialize Firebase - using exact same config as your working admin-dashboard.html
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOBPPyVl5mN8o0Dxt0WvGNl0lBb-4kgXo",
+            authDomain: "auric-a0c92.firebaseapp.com",
+            projectId: "auric-a0c92",
+            storageBucket: "auric-a0c92.firebasestorage.app",
+            messagingSenderId: "878979958342",
+            appId: "1:878979958342:web:e6092f7522488d21eaec47",
+            measurementId: "G-ZYZ750JHMB"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Global variables for orders data
+        let allOrders = [];
+        let newOrders = [];
+        let confirmedOrders = [];
+        let allCustomers = [];
+
+        // Status indicator updates
+        function updateStatus(text, status = 'loading') {
+            const statusText = document.getElementById('status-text');
+            const statusIndicator = document.querySelector('.status-indicator');
+            
+            if (statusText) statusText.textContent = text;
+            if (statusIndicator) {
+                statusIndicator.className = `status-indicator status-${status}`;
+            }
+        }
+
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            if (errorElement) {
+                errorElement.innerHTML = `<div style="padding: 20px; color: #dc2626; background: #fee2e2; border-radius: 6px; margin: 16px;">${message}</div>`;
+                errorElement.style.display = 'block';
+            }
+        }
+
+        // Get order amount with multiple field fallbacks
+        function getOrderAmount(orderData) {
+            return parseFloat(
+                orderData.totalAmount ||
+                orderData.amount ||
+                orderData.orderTotal ||
+                orderData.total ||
+                (orderData.products && orderData.products.reduce((sum, p) => sum + (parseFloat(p.price || 0) * (p.quantity || 1)), 0)) ||
+                0
+            );
+        }
+
+        // Load orders function - EXACT copy from working admin-dashboard.html
+        async function loadOrders() {
+            try {
+                console.log('Loading orders from Firestore...');
+
+                document.getElementById('orders-loading').style.display = 'flex';
+                document.getElementById('new-orders-loading').style.display = 'flex';
+                document.getElementById('orders-table').style.display = 'none';
+                document.getElementById('new-orders-table').style.display = 'none';
+
+                const usersSnapshot = await db.collection('users').get();
+                allOrders = [];
+                newOrders = [];
+                confirmedOrders = [];
+
+                console.log(`Found ${usersSnapshot.size} users in Firestore`);
+
+                for (const userDoc of usersSnapshot.docs) {
+                    try {
+                        const userOrdersSnapshot = await db.collection('users')
+                            .doc(userDoc.id)
+                            .collection('orders')
+                            .get();
+
+                        const userData = userDoc.data();
+
+                        userOrdersSnapshot.forEach(orderDoc => {
+                            const orderData = orderDoc.data();
+
+                            let orderDate;
+                            if (orderData.timestamp && orderData.timestamp.seconds) {
+                                orderDate = new Date(orderData.timestamp.seconds * 1000);
+                            } else if (orderData.timestamp && orderData.timestamp.toDate) {
+                                orderDate = orderData.timestamp.toDate();
+                            } else if (orderData.createdAt) {
+                                orderDate = new Date(orderData.createdAt);
+                            } else {
+                                orderDate = new Date();
+                            }
+
+                            const orderAmount = getOrderAmount(orderData);
+
+                            const processedOrder = {
+                                orderId: orderDoc.id,
+                                userId: userDoc.id,
+                                customerName: userData.displayName || userData.email?.split('@')[0] || 'Unknown',
+                                customerEmail: userData.email || 'Unknown',
+                                customerPhone: userData.phoneNumber || orderData.customer?.phone || 'Not provided',
+                                customerAddress: orderData.customer?.address || orderData.shippingAddress || 'Not provided',
+                                customerCity: orderData.customer?.city || orderData.shippingAddress?.split(',')[1]?.trim() || '',
+                                customerState: orderData.customer?.state || orderData.shippingAddress?.split(',').slice(-2)[0]?.trim() || '',
+                                date: orderDate,
+                                amount: orderAmount,
+                                status: orderData.paymentStatus || orderData.status || 'pending',
+                                paymentMethod: orderData.paymentMethod || 'unknown',
+                                products: orderData.products || [],
+                                notes: orderData.notes || '',
+                                orderReference: orderData.orderReference || orderDoc.id,
+                                adminConfirmed: orderData.adminConfirmed || false,
+                                ...orderData
+                            };
+
+                            allOrders.push(processedOrder);
+
+                            // Separate new orders (not admin confirmed) from confirmed orders
+                            if (!processedOrder.adminConfirmed) {
+                                newOrders.push(processedOrder);
+                            } else {
+                                confirmedOrders.push(processedOrder);
+                            }
+                        });
+
+                    } catch (userOrderError) {
+                        console.warn(`Could not load orders for user ${userDoc.id}:`, userOrderError.message);
+                    }
+                }
+
+                console.log(`✅ Loaded ${allOrders.length} total orders from Firebase`);
+                console.log(`✅ New orders: ${newOrders.length}, Confirmed orders: ${confirmedOrders.length}`);
+
+                // Update displays
+                updateNewOrdersDisplay();
+                updateOrdersDisplay();
+                updateOrdersStats();
+
+            } catch (error) {
+                console.error('❌ Error loading orders:', error);
+                document.getElementById('orders-loading').style.display = 'none';
+                document.getElementById('new-orders-loading').style.display = 'none';
+                showError('orders-error', `Error loading orders: ${error.message}`);
+                showError('new-orders-error', `Error loading new orders: ${error.message}`);
+            }
+        }
+
+        // Update new orders display
+        function updateNewOrdersDisplay() {
+            const newOrdersLoading = document.getElementById('new-orders-loading');
+            const newOrdersTable = document.getElementById('new-orders-table');
+            const newOrdersTbody = document.getElementById('new-orders-tbody');
+
+            newOrdersLoading.style.display = 'none';
+
+            if (newOrders.length === 0) {
+                newOrdersTable.style.display = 'block';
+                newOrdersTbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 40px; color: #64748b;">
+                            <h3>No new orders pending confirmation</h3>
+                            <p>All orders have been processed by admin.</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // Sort new orders by date (newest first)
+            newOrders.sort((a, b) => b.date - a.date);
+
+            newOrdersTbody.innerHTML = newOrders.map(order => {
+                const formattedDate = order.date.toLocaleDateString('en-IN');
+                const formattedAmount = `₹${order.amount.toLocaleString('en-IN')}`;
+
+                return `
+                    <tr>
+                        <td><strong>${order.orderReference.substring(0, 12)}...</strong></td>
+                        <td>
+                            <div><strong>${order.customerName}</strong></div>
+                            <small style="color: #64748b;">${order.customerEmail}</small>
+                        </td>
+                        <td>
+                            <div><strong>${order.customerPhone}</strong></div>
+                            <small style="color: #64748b;">${order.customerAddress.length > 35 ? order.customerAddress.substring(0, 35) + '...' : order.customerAddress}</small>
+                            ${order.customerCity ? `<br><small style="color: #2563eb;">${order.customerCity}, ${order.customerState || ''}</small>` : ''}
+                        </td>
+                        <td>${formattedDate}</td>
+                        <td>
+                            <span style="background: #e2e8f0; padding: 4px 8px; border-radius: 12px; font-size: 12px;">
+                                ${order.products.length} types
+                            </span>
+                            <br>
+                            <small style="color: #64748b; margin-top: 2px;">
+                                ${order.products.reduce((sum, p) => sum + (p.quantity || 1), 0)} total qty
+                            </small>
+                        </td>
+                        <td><strong>${formattedAmount}</strong></td>
+                        <td>
+                            <span style="
+                                padding: 4px 8px; 
+                                border-radius: 4px; 
+                                font-size: 12px; 
+                                background: #fee2e2;
+                                color: #dc2626;
+                            ">
+                                PENDING
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-success" onclick="confirmOrder('${order.orderId}', '${order.userId}')" 
+                                    style="padding: 6px 12px; margin: 2px; font-size: 12px;">
+                                Confirm
+                            </button>
+                            <button class="btn btn-danger" onclick="cancelOrder('${order.orderId}', '${order.userId}')" 
+                                    style="padding: 6px 12px; margin: 2px; font-size: 12px;">
+                                Cancel
+                            </button>
+                            <button class="btn btn-secondary" onclick="viewOrderDetails('${order.orderId}')" 
+                                    style="padding: 6px 12px; margin: 2px; font-size: 12px;">
+                                Details
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            newOrdersTable.style.display = 'block';
+        }
+
+        // Update recent orders display
+        function updateOrdersDisplay() {
+            const ordersLoading = document.getElementById('orders-loading');
+            const ordersTable = document.getElementById('orders-table');
+            const ordersTbody = document.getElementById('orders-tbody');
+
+            ordersLoading.style.display = 'none';
+
+            if (confirmedOrders.length === 0) {
+                ordersTable.style.display = 'block';
+                ordersTbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 40px; color: #64748b;">
+                            <h3>No confirmed orders found</h3>
+                            <p>Confirmed orders will appear here after admin approval.</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // Sort confirmed orders by date (newest first)
+            confirmedOrders.sort((a, b) => b.date - a.date);
+
+            // Show recent confirmed orders (limit to 10)
+            const recentOrders = confirmedOrders.slice(0, 10);
+
+            ordersTbody.innerHTML = recentOrders.map(order => {
+                const formattedDate = order.date.toLocaleDateString('en-IN');
+                const formattedAmount = `₹${order.amount.toLocaleString('en-IN')}`;
+
+                return `
+                    <tr>
+                        <td><strong>${order.orderReference.substring(0, 12)}...</strong></td>
+                        <td>
+                            <div><strong>${order.customerName}</strong></div>
+                            <small style="color: #64748b;">${order.customerEmail}</small>
+                        </td>
+                        <td>
+                            <div><strong>${order.customerPhone}</strong></div>
+                            <small style="color: #64748b;">${order.customerAddress.length > 35 ? order.customerAddress.substring(0, 35) + '...' : order.customerAddress}</small>
+                            ${order.customerCity ? `<br><small style="color: #2563eb;">${order.customerCity}, ${order.customerState || ''}</small>` : ''}
+                        </td>
+                        <td>${formattedDate}</td>
+                        <td>
+                            <span style="background: #e2e8f0; padding: 4px 8px; border-radius: 12px; font-size: 12px;">
+                                ${order.products.length} types
+                            </span>
+                            <br>
+                            <small style="color: #64748b; margin-top: 2px;">
+                                ${order.products.reduce((sum, p) => sum + (p.quantity || 1), 0)} total qty
+                            </small>
+                        </td>
+                        <td><strong>${formattedAmount}</strong></td>
+                        <td>
+                            <span style="
+                                padding: 4px 8px; 
+                                border-radius: 4px; 
+                                font-size: 12px; 
+                                background: #dcfce7;
+                                color: #059669;
+                            ">
+                                CONFIRMED
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-secondary" onclick="viewOrderDetails('${order.orderId}')" 
+                                    style="padding: 6px 12px; margin: 2px; font-size: 12px;">
+                                Details
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            ordersTable.style.display = 'block';
+        }
+
+        // Update orders statistics - EXACT copy from working admin-dashboard.html
+        function updateOrdersStats() {
+            const totalOrdersElement = document.getElementById('total-orders');
+            const totalRevenueElement = document.getElementById('total-revenue');
+            const ordersChangeElement = document.getElementById('orders-change');
+            const revenueChangeElement = document.getElementById('revenue-change');
+
+            // Calculate totals from confirmed orders only
+            const totalOrders = confirmedOrders.length;
+            const totalRevenue = confirmedOrders.reduce((sum, order) => sum + order.amount, 0);
+
+            // Update display
+            totalOrdersElement.textContent = totalOrders.toLocaleString('en-IN');
+            totalRevenueElement.textContent = `₹${totalRevenue.toLocaleString('en-IN')}`;
+
+            // Calculate recent trends (last 30 days)
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+            const recentOrders = confirmedOrders.filter(order => order.date >= thirtyDaysAgo);
+            const recentRevenue = recentOrders.reduce((sum, order) => sum + order.amount, 0);
+
+            if (ordersChangeElement) {
+                ordersChangeElement.textContent = `${recentOrders.length} confirmed in last 30 days`;
+            }
+            if (revenueChangeElement) {
+                revenueChangeElement.textContent = `₹${recentRevenue.toLocaleString('en-IN')} in last 30 days`;
+            }
+        }
+
+        // Load customers - EXACT copy from working admin-dashboard.html
+        async function loadCustomers() {
+            try {
+                console.log('Loading customers from Firestore...');
+
+                document.getElementById('customers-loading').style.display = 'flex';
+                document.getElementById('customers-table').style.display = 'none';
+
+                const usersSnapshot = await db.collection('users').get();
+                allCustomers = [];
+
+                for (const userDoc of usersSnapshot.docs) {
+                    const userData = userDoc.data();
+
+                    // Get user's confirmed orders only
+                    const userOrders = confirmedOrders.filter(order => order.userId === userDoc.id);
+                    const totalSpent = userOrders.reduce((sum, order) => sum + order.amount, 0);
+                    const lastOrder = userOrders.length > 0 ? 
+                        Math.max(...userOrders.map(order => order.date)) : null;
+
+                    allCustomers.push({
+                        name: userData.displayName || userData.email?.split('@')[0] || 'Unknown User',
+                        email: userData.email || 'No email provided',
+                        phone: userData.phoneNumber || 'Not provided',
+                        orders: userOrders.length,
+                        totalSpent: Math.round(totalSpent),
+                        lastOrder: lastOrder ? new Date(lastOrder).toLocaleDateString('en-IN') : 'Never'
+                    });
+                }
+
+                console.log(`✅ Loaded ${allCustomers.length} customers`);
+                updateCustomersDisplay();
+
+            } catch (error) {
+                console.error('❌ Error loading customers:', error);
+                showError('customers-error', `Error loading customers: ${error.message}`);
+            }
+        }
+
+        // Update customers display - EXACT copy from working admin-dashboard.html
+        function updateCustomersDisplay() {
+            const customersLoading = document.getElementById('customers-loading');
+            const customersTable = document.getElementById('customers-table');
+            const customersTbody = document.getElementById('customers-tbody');
+            const totalCustomersElement = document.getElementById('total-customers');
+            const customersChangeElement = document.getElementById('customers-change');
+
+            customersLoading.style.display = 'none';
+
+            // Update customer count
+            totalCustomersElement.textContent = allCustomers.length.toLocaleString('en-IN');
+            if (customersChangeElement) {
+                customersChangeElement.textContent = `${allCustomers.filter(c => c.orders > 0).length} active customers`;
+            }
+
+            if (allCustomers.length === 0) {
+                customersTable.style.display = 'block';
+                customersTbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: #64748b;">
+                            No customers found in database
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // Sort customers by total spent
+            allCustomers.sort((a, b) => b.totalSpent - a.totalSpent);
+
+            customersTbody.innerHTML = allCustomers.slice(0, 10).map(customer => `
+                <tr>
+                    <td><strong>${customer.name}</strong></td>
+                    <td>${customer.email}</td>
+                    <td>${customer.phone}</td>
+                    <td>${customer.orders}</td>
+                    <td>₹${customer.totalSpent.toLocaleString('en-IN')}</td>
+                    <td>${customer.lastOrder}</td>
+                </tr>
+            `).join('');
+
+            customersTable.style.display = 'block';
+        }
+
+        // Order action functions - EXACT copy from working admin-dashboard.html
+        async function confirmOrder(orderId, userId) {
+            if (!confirm('Confirm this order? The customer will receive a confirmation email.')) {
+                return;
+            }
+
+            try {
+                console.log(`Confirming order ${orderId} for user ${userId}...`);
+
+                // Update order in Firebase using user subcollection structure
+                await db.collection('users')
+                    .doc(userId)
+                    .collection('orders')
+                    .doc(orderId)
+                    .update({
+                        adminConfirmed: true,
+                        confirmedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        status: 'confirmed'
+                    });
+
+                // Get order details for email
+                const orderDoc = await db.collection('users')
+                    .doc(userId)
+                    .collection('orders')
+                    .doc(orderId)
+                    .get();
+
+                const orderData = orderDoc.data();
+
+                // Send confirmation email
+                try {
+                    // Prepare complete email data structure
+                    const emailData = {
+                        orderReference: orderData.orderReference || orderData.id,
+                        orderDate: orderData.orderDate || orderData.timestamp?.toDate?.() || new Date(),
+                        orderTotal: orderData.total || orderData.orderTotal || 0,
+                        paymentMethod: orderData.paymentMethod || 'Not specified',
+                        customer: {
+                            firstName: orderData.customer?.firstName || orderData.firstName || '',
+                            lastName: orderData.customer?.lastName || orderData.lastName || '',
+                            email: orderData.customer?.email || orderData.email || '',
+                            phone: orderData.customer?.phone || orderData.phone || '',
+                            address: orderData.customer?.address || orderData.address || '',
+                            city: orderData.customer?.city || orderData.city || '',
+                            state: orderData.customer?.state || orderData.state || '',
+                            postalCode: orderData.customer?.postalCode || orderData.postalCode || ''
+                        },
+                        products: orderData.products || orderData.items || [],
+                        notes: orderData.notes || orderData.specialInstructions || ''
+                    };
+
+                    console.log('Sending confirmation email with data:', emailData);
+
+                    const emailResponse = await fetch('/.netlify/functions/send-order-email', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(emailData)
+                    });
+
+                    const emailResult = await emailResponse.json();
+
+                    if (emailResult.success) {
+                        console.log('✅ Confirmation email sent successfully');
+                    } else {
+                        console.warn('⚠️ Order confirmed but email failed:', emailResult.error || emailResult.message);
+                        console.error('Email error details:', emailResult);
+                    }
+                } catch (emailError) {
+                    console.warn('⚠️ Order confirmed but email service unavailable:', emailError);
+                    console.error('Email error details:', emailError);
+                }
+
+                alert('Order confirmed successfully! Customer will receive confirmation email.');
+
+                // Refresh orders
+                await loadOrders();
+
+            } catch (error) {
+                console.error('❌ Error confirming order:', error);
+                alert(`Error confirming order: ${error.message}`);
+            }
+        }
+
+        async function cancelOrder(orderId, userId) {
+            if (!confirm('Cancel this order? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                console.log(`Cancelling order ${orderId} for user ${userId}...`);
+
+                await db.collection('users')
+                    .doc(userId)
+                    .collection('orders')
+                    .doc(orderId)
+                    .update({
+                        status: 'cancelled',
+                        cancelledAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        cancelledBy: 'admin'
+                    });
+
+                alert('Order cancelled successfully.');
+
+                // Refresh orders
+                await loadOrders();
+
+            } catch (error) {
+                console.error('❌ Error cancelling order:', error);
+                alert(`Error cancelling order: ${error.message}`);
+            }
+        }
+
+        function viewOrderDetails(orderId) {
+            const order = allOrders.find(o => o.orderId === orderId);
+            if (order) {
+                alert(`Order Details:\nID: ${order.orderReference}\nCustomer: ${order.customerName}\nAmount: ₹${order.amount.toLocaleString()}\nItems: ${order.products.length}`);
+            }
+        }
+
+        function viewCustomerDetails(customerId) {
+            const customer = allCustomers.find(c => c.id === customerId);
+            if (customer) {
+                alert(`Customer Details:\nName: ${customer.displayName || customer.firstName}\nEmail: ${customer.email}\nPhone: ${customer.phone || 'N/A'}`);
+            }
+        }
+
+        // Load inventory data - EXACT copy from working admin-dashboard.html
+        async function loadInventoryData() {
+            try {
+                console.log('Loading inventory data...');
+
+                const categories = ['featured-collection', 'new-arrivals', 'saree-collection'];
+                let totalProducts = 0;
+                let totalValue = 0;
+
+                for (const category of categories) {
+                    try {
+                        const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
+                        const data = await response.json();
+
+                        if (data.success && data.products) {
+                            totalProducts += data.products.length;
+                            totalValue += data.products.reduce((sum, product) => {
+                                return sum + (parseFloat(product.price) || 0);
+                            }, 0);
+                        }
+                    } catch (error) {
+                        console.warn(`Could not load ${category} products:`, error);
+                    }
+                }
+
+                console.log(`✅ Loaded ${totalProducts} products, inventory value: ₹${totalValue.toLocaleString('en-IN')}`);
+
+                document.getElementById('inventory-value').textContent = `₹${Math.round(totalValue).toLocaleString('en-IN')}`;
+                const inventoryChangeElement = document.getElementById('inventory-change');
+                if (inventoryChangeElement) {
+                    inventoryChangeElement.textContent = `${totalProducts} products in inventory`;
+                }
+
+            } catch (error) {
+                console.error('❌ Error loading inventory:', error);
+                document.getElementById('inventory-value').textContent = '₹0';
+                const inventoryChangeElement = document.getElementById('inventory-change');
+                if (inventoryChangeElement) {
+                    inventoryChangeElement.textContent = 'Error loading inventory';
+                }
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('Professional Admin Dashboard initialized');
+            updateStatus('Connected to Firebase', 'success');
+            
+            // Load initial data
+            await loadOrders();
+            await loadCustomers();
+            await loadInventoryData();
+            
+            console.log('✅ Dashboard data loaded successfully');
+            updateStatus('Dashboard ready', 'success');
+        });
+
+        // Refresh orders button
+        document.getElementById('refresh-orders')?.addEventListener('click', loadOrders);
+    </script>
+</body>
+</html>

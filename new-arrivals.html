@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>New Arrivals - Nazakat</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpLGCJKypKP/lX+/Pvw2DNA" crossorigin="anonymous">
+    <!-- Fallback font awesome icons if CDN fails -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lato:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css?v=1.0.4">
+    <link rel="stylesheet" href="css/responsive.css?v=1.0.4">
+    <link rel="stylesheet" href="css/navbar.css?v=1.1.3">
+    <link rel="stylesheet" href="css/cart.css?v=1.0.2">
+    <link rel="stylesheet" href="css/shop.css?v=1.0.2">
+    <link rel="stylesheet" href="css/new-arrivals-grid.css?v=1.0.0">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
+
+    <!-- Initialize Firebase -->
+    <script>
+      // Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
+        authDomain: "auric-a0c92.firebaseapp.com",
+        projectId: "auric-a0c92",
+        storageBucket: "auric-a0c92.appspot.com",
+        messagingSenderId: "878979958342",
+        appId: "1:878979958342:web:e6092f7522488d21eaec47",
+        measurementId: "G-ZYZ750JHMB"
+      };
+
+      // Initialize Firebase directly (like in login.html)
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+
+      // Configure Firestore settings for better offline handling
+      firebase.firestore().settings({
+        cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
+        ignoreUndefinedProperties: true
+      });
+
+      // Enable offline persistence
+      firebase.firestore().enablePersistence({ synchronizeTabs: true })
+        .catch(err => {
+          if (err.code == 'failed-precondition') {
+            console.log('Multiple tabs open, persistence can only be enabled in one tab at a time.');
+          } else if (err.code == 'unimplemented') {
+            console.log('The current browser does not support all of the features required to enable persistence');
+          }
+        });
+
+      // Enable session persistence
+      firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .catch(error => {
+          console.error("Auth persistence error:", error);
+        });
+    </script>
+    
+    <style>
+        /* Hide mobile menu close button on large devices */
+        @media (min-width: 769px) {
+            #closeMenu {
+                display: none !important;
+            }
+        }
+    </style>
+  </head>
+  <body>
+
+    <!-- Header -->
+    <header class="header">
+        <!-- Promo Banner -->
+        <div class="promo-banner">
+            <button class="banner-arrow banner-prev">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <p>Save 21% on exclusive selections - <a href="#">Shop Now</a></p>
+            <button class="banner-arrow banner-next">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <!-- New Responsive Navigation -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <!-- Logo -->
+                <a href="index.html" class="brand">
+                    <img src="images/logos/IMG_20250801_204447.jpg" alt="Nazakat" class="brand-logo">
+                </a>
+
+                <!-- Mobile Toggle Button -->
+                <div class="hamburger" id="navToggle"><img src="images/icons/bars-staggered (2).png" alt=""style="width: 25px; height: 25px;">
+                </div>
+              <!--  <div class="hamburger" id="navToggle">
+                    <i class="fas fa-bars"></i>
+                </div>-->
+
+                <!-- Navigation Links -->
+                <div class="nav-menu" id="navMenu">
+                    <!-- Close button for mobile menu in the top right corner -->
+                    <i id="closeMenu" class="fa-solid fa-xmark meenu-close" onclick="closeMobileMenu()" style="font-size: 24px; margin-left: 90%; color: #333;" ></i>
+
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="new-arrivals.html" class="nav-link">New Arrivals</a></li>
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle">Collections <i class="fas fa-chevron-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="shop.html">All Collection</a></li>
+                                <li><a href="featured-collection.html">Featured Collection</a></li>
+                                <li><a href="saree-collection.html">Saree Collection</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item"><a href="about.html" class="nav-link">About</a></li>
+                        <li class="nav-item"><a href="index.html#customer-reviews" class="nav-link">Testimonials</a></li>
+                        <li class="nav-item"><a href="order-track.html" class="nav-link">Order Track</a></li>
+                        <li class="nav-item"><a href="#" class="nav-link">Contact</a></li>
+                    </ul>
+
+                    <!-- Mobile account links in separate div after Contact -->
+                    <div class="mobile-account-links mobile-special">
+                        <a href="#" class="mobile-account-link">
+                            <img src="images/icons/user.png" alt="Cart" style="width: 18px; height: 18px;">  &nbsp; Account
+                        </a>
+                        <a href="#" class="mobile-account-link wishlist-toggle">
+                            <img src="images/icons/heart.png" alt="Cart" style="width: 18px; height: 18px;"> &nbsp;   Wishlist (<span class="mobile-wishlist-count">0</span>)
+                        </a>
+                        <a href="#" class="mobile-account-link mobile-cart-toggle">
+                            <img src="images/icons/cart-minus.png" alt="Cart" style="width:18px; height: 18px; vertical-align: middle;">  &nbsp; Shopping Bag (<span class="mobile-cart-count">0</span>)
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Navigation Icons -->
+                <div class="nav-icons">
+                    <a href="#" class="icon-link search-icon">
+                        <img src="images/icons/search.png" alt="Search" style="width: 20px; height: 20px;">
+                    </a>
+                    <a href="login.html" class="icon-link account-icon" id="user-icon">
+                        <img src="images/icons/user.png" alt="User" style="width: 25px; height: 25px;">
+                    </a>
+                    <a href="#" class="icon-link wishlist-icon-container wishlist-toggle">
+                        <img src="images/icons/heart.png" alt="Wishlist" style="width: 20px; height: 20px;">
+                        <div class="wishlist-count">0</div>
+                    </a>
+                    <a href="#" class="icon-link cart-icon-container cart-toggle" id="cartToggleButton">
+                        <img src="images/icons/cart-minus.png" alt="Cart" style="width: 20px; height: 20px;">
+                        <div class="cart-count">0</div>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Overlay for menu background -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+
+    <!-- Hero Section with Background Image -->
+    <section class="new-arrivals-hero">
+        <div class="hero-background">
+            <img src="images/hero-slides/1000824644.jpg" alt="New Arrivals Collection" class="hero-bg-image">
+            <div class="hero-overlay"></div>
+        </div>
+        <div class="hero-content">
+            <h1 class="hero-title">New Arrivals</h1>
+            <p class="hero-subtitle">Discover our latest exquisite jewelry collections</p>
+        </div>
+    </section>
+
+    <!-- Product Grid Section -->
+    <section class="shop-products-section">
+        <div class="shop-products">
+            <div class="products-grid" id="new-arrivals-products-grid">
+                <!-- Products will be loaded here dynamically -->
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- Cart Panel - Standard implementation -->
+    <div class="cart-panel">
+      <div class="cart-panel-header">
+        <h3>Your Shopping Bag</h3>
+        <button class="close-cart-btn">×</button>
+      </div>
+      <div class="cart-items">
+        <!-- Cart items will be inserted here by JavaScript -->
+        <div class="empty-cart-message">Your cart is empty</div>
+      </div>
+      <div class="cart-panel-footer">
+        <div class="cart-panel-subtotal">
+          <span>Subtotal:</span>
+          <span class="subtotal-amount">₹0.00</span>
+        </div>
+        <div class="cart-panel-buttons">
+          <button class="view-cart-btn continue-shopping-btn">Continue Shopping</button>
+          <a href="checkout.html" class="checkout-btn">Checkout</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cart Overlay -->
+    <div class="cart-overlay"></div>
+
+    <!-- Wishlist Panel - Standard implementation -->
+    <div class="wishlist-panel">
+      <div class="wishlist-panel-header">
+        <h3>My Wishlist</h3>
+        <button class="close-wishlist-btn">×</button>
+      </div>
+      <div class="wishlist-items">
+        <!-- Wishlist items will be inserted here by JavaScript -->
+        <div class="empty-wishlist-message">Your wishlist is empty</div>
+      </div>
+      <div class="wishlist-panel-footer">
+        <div class="wishlist-panel-actions">
+          <button class="clear-wishlist-btn">Clear Wishlist</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wishlist Overlay -->
+    <div class="wishlist-overlay"></div>
+
+    <!-- WhatsApp Button -->
+    <a href="https://wa.me/919310250047?text=Hi! I'm interested. Can you help me?" class="whatsapp-btn">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <!-- Filter Modal (Hidden Initially) -->
+    <div class="filter-modal">
+        <div class="filter-modal-content">
+            <div class="filter-modal-header">
+                <h2>Filter Products</h2>
+                <button class="close-filter-modal" id="closeFilterModal">×</button>
+            </div>
+            <div class="filter-modal-body">
+                <div class="filter-section">
+                    <h3>Category</h3>
+                    <div class="filter-options">
+                        <label class="filter-option-label">
+                            <input type="radio" name="category" value="all" checked> All Necklaces
+                        </label>
+                        <label class="filter-option-label">
+                            <input type="radio" name="category" value="gold"> Gold
+                        </label>
+                        <label class="filter-option-label">
+                            <input type="radio" name="category" value="diamond"> Diamond
+                        </label>
+                        <label class="filter-option-label">
+                            <input type="radio" name="category" value="polki"> Polki
+                        </label>
+                        <label class="filter-option-label">
+                            <input type="radio" name="category" value="pearl"> Pearl
+                        </label>
+                    </div>
+                </div>
+                <div class="filter-section">
+                    <h3>Availability</h3>
+                    <div class="filter-options">
+                        <label class="filter-option-label">
+                            <input type="checkbox" name="availability" value="ready-to-ship"> Ready to Ship
+                        </label>
+                        <label class="filter-option-label">
+                            <input type="checkbox" name="availability" value="made-to-order"> Made to Order
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="filter-modal-footer">
+                <button class="apply-filter-btn" id="applyFilterBtn">Apply Filters</button>
+                <button class="clear-filter-btn" id="clearFilterBtn">Clear All</button>
+            </div>
+        </div>
+    </div>
+
+      <div class="whatsapp-btn">
+          <i class="fab fa-whatsapp"></i>
+      </div>
+      <!-- Footer Toggle Script -->
+          <script src="js/footer-toggle.js"></script>
+
+      <!-- Minimalist Collapsible Footer -->
+          <footer class="footer-minimalist">
+              <div class="container">
+                  <!-- Info Section -->
+                  <div class="footer-section">
+                      <button class="footer-toggle" data-section="info-content">
+                          <span class="footer-title">Info</span>
+                          <i class="fas fa-chevron-down"></i>
+                      </button>
+                      <div class="footer-content" id="info-content">
+                          <ul>
+                              <li><a href="#">Our Story</a></li>
+                              <li><a href="#">Shipping Policy</a></li>
+                              <li><a href="#">Returns & Exchanges</a></li>
+                              <li><a href="#">Size Guide</a></li>
+                              <li><a href="#">Care Instructions</a></li>
+                              <li><a href="#">Terms and Conditions</a></li>
+                              <li><a href="#">Privacy Policy</a></li>
+                          </ul>
+                      </div>
+                  </div>
+
+                  <!-- Categories Section -->
+                  <div class="footer-section">
+                      <button class="footer-toggle" data-section="categories-content">
+                          <span class="footer-title">Categories</span>
+                          <i class="fas fa-chevron-down"></i>
+                      </button>
+                      <div class="footer-content" id="categories-content">
+                          <ul>
+                              <li><a href="#">Saree</a></li>
+                              <li><a href="#">Lehenga</a></li>
+                              <li><a href="#">Suit</a></li>
+                          </ul>
+                      </div>
+                  </div>
+
+                  <!-- Collection Section -->
+                  <div class="footer-section">
+                      <button class="footer-toggle" data-section="collection-content">
+                          <span class="footer-title">Collection</span>
+                          <i class="fas fa-chevron-down"></i>
+                      </button>
+                      <div class="footer-content" id="collection-content">
+                          <ul>
+
+                              <li><a href="#">New Arrivals</a></li>
+                              <li><a href="#">Saree Collection</a></li>
+                              <li><a href="#">Featured Collection</a></li>
+                          </ul>
+                      </div>
+                  </div>
+
+                  <!-- Exclusive Benefits Section -->
+                  <div class="footer-section">
+                      <button class="footer-toggle" data-section="benefits-content">
+                          <span class="footer-title">Exclusive benefits</span>
+                          <i class="fas fa-chevron-down"></i>
+                      </button>
+                      <div class="footer-content" id="benefits-content">
+                          <ul>
+                              <li><a href="#">VIP Customer Program</a></li>
+                              <li><a href="#">Free Shipping</a></li>
+                              <li><a href="#">30-Day Returns</a></li>
+                              <li><a href="#">Lifetime Warranty</a></li>
+                              <li><a href="#">Personal Styling</a></li>
+                              <li><a href="#">Early Access</a></li>
+                              <li><a href="#">Member Discounts</a></li>
+                          </ul>
+                      </div>
+                  </div>
+
+                    
+
+        <div class="footer-bottom">
+            <div class="container">
+                <div class="footer-info">
+                    <div class="copyright">
+                        <p>&copy; 2025 Auric. All rights reserved. | Developed by <a href="https://savannaik.netlify.app/" target="_blank" style="color: #9c7c38; text-decoration: none; font-weight: 500;">Savan Naik</a></p>
+                    </div>
+
+                    <div class="footer-links">
+                        <a href="terms-conditions.html">Terms and Conditions</a>
+                        <a href="privacy-policy.html">Privacy Policy</a>
+                        </div>
+
+                    <div class="payment-methods">
+                        <span><i class="fab fa-cc-amex"></i></span>
+                        <!-- <span><i class="fab fa-apple-pay"></i></span>
+                        <span><i class="fab fa-cc-diners-club"></i></span>-->
+                        <span><i class="fab fa-cc-discover"></i></span>
+                        <span><i class="fab fa-google-pay"></i></span>
+                        <span><i class="fab fa-cc-mastercard"></i></span>
+                        <span><i class="fab fa-cc-paypal"></i></span>
+                        <span class="union-pay">UP</span>
+                        <span><i class="fab fa-cc-visa"></i></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </footer>
+    <!-- New Arrivals Page Loader (Grid Layout) -->
+    <script src="js/new-arrivals-page-loader.js?v=1.0.1"></script>
+    
+    <!-- Core JS Files -->
+    <script src="js/navigation.js?v=1.0.4"></script>
+    <script src="js/banner-rotator.js?v=1.0.1"></script>
+    <script src="js/error-handler.js"></script>
+    <script src="js/firebase/firebase-auth.js"></script>
+    <script src="js/cart-local-storage.js?v=1.0.0"></script>
+    <script src="js/firebase/firebase-cart-manager.js?v=1.0.0"></script>
+    <script src="js/cart-manager.js?v=1.0.1"></script>
+    <script src="js/wishlist-local-storage.js?v=1.0.0"></script>
+    <script src="js/firebase/firebase-wishlist-manager.js?v=1.0.0"></script>
+    <script src="js/wishlist-manager.js?v=1.0.0"></script>
+    <script src="js/main.js"></script>
+
+    <!-- Firebase Authentication Check -->
+    <script>
+      // Use the already loaded firebase-auth.js
+      const FirebaseAuth = window.FirebaseAuth;
+
+      // Handle user authentication state
+      document.addEventListener('DOMContentLoaded', () => {
+        const userIcon = document.getElementById('user-icon');
+
+        if (userIcon) {
+          // First check current Firebase user
+          const currentUser = firebase.auth().currentUser;
+
+          if (currentUser) {
+            // Firebase user is logged in
+            console.log("Firebase user is logged in:", currentUser.uid);
+            userIcon.href = "profile.html";
+            userIcon.classList.add('logged-in');
+          } else {
+            // No current Firebase user, check session
+            if (FirebaseAuth.isLoggedIn()) {
+              // User is logged in according to session
+              console.log("User is logged in from session");
+              userIcon.href = "profile.html";
+              userIcon.classList.add('logged-in');
+            } else {
+              // No session found
+              console.log("No user session found");
+              userIcon.href = "login.html";
+              userIcon.classList.remove('logged-in');
+            }
+          }
+        }
+      });
+
+
+      // Also set up auth state observer for real-time updates
+      FirebaseAuth.observeAuthState((user) => {
+        // Get the reference to the user icon again, since this may run at a different time
+        const userIcon = document.getElementById('user-icon');
+
+        // Only proceed if userIcon exists
+        if (userIcon) {
+          if (user) {
+            // User is signed in, update icon to go to profile
+            console.log("Auth state: User is signed in:", user.uid);
+
+            // Save session data in case it was missing
+            FirebaseAuth.saveSession({
+              uid: user.uid,
+              email: user.email,
+              displayName: user.displayName || 'User',
+              photoURL: user.photoURL,
+              loggedIn: true
+            });
+
+            userIcon.href = "profile.html";
+            userIcon.classList.add('logged-in');
+          } else {
+            // User is not signed in, keep login link
+            console.log("Auth state: User is signed out");
+            FirebaseAuth.clearSession();
+            userIcon.href = "login.html";
+            userIcon.classList.remove('logged-in');
+          }
+        }
+      });
+
+      // Cart and wishlist functionality is handled by CartManager and WishlistManager
+    </script>
+  </body>
+</html>

@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Your Order - Auric Jewelry</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Site Styles -->
+    <link rel="stylesheet" href="css/styles.css?v=1.0.4">
+    <link rel="stylesheet" href="css/responsive.css?v=1.0.4">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        .tracking-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        .tracking-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .tracking-form {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .tracking-results {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: none;
+        }
+        
+        .tracking-status {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .status-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .status-delivered {
+            background: #28a745;
+            color: white;
+        }
+        
+        .status-in-transit {
+            background: #007bff;
+            color: white;
+        }
+        
+        .status-pending {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .status-returned {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .tracking-timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-bottom: 2rem;
+        }
+        
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: -2rem;
+            top: 0.5rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #603000;
+        }
+        
+        .timeline-item:after {
+            content: '';
+            position: absolute;
+            left: -1.7rem;
+            top: 1.2rem;
+            width: 2px;
+            height: calc(100% - 1rem);
+            background: #e9ecef;
+        }
+        
+        .timeline-item:last-child:after {
+            display: none;
+        }
+        
+        .timeline-content {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-left: 1rem;
+        }
+        
+        .loading-spinner {
+            text-align: center;
+            padding: 2rem;
+            display: none;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        .track-btn {
+            background: #603000;
+            border: none;
+            padding: 12px 30px;
+            color: white;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .track-btn:hover {
+            background: #4a2300;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .order-details {
+            background: #e3f2fd;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .test-mode-badge {
+            display: inline-block;
+            background: #ff9800;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <img src="images/logos/auric-logo.png" alt="Auric" height="40">
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="dtdc-track.html">
+                    <i class="fas fa-truck"></i> DTDC Tracking
+                </a>
+                <a class="nav-link" href="index.html">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="tracking-container" style="margin-top: 100px;">
+        <div class="tracking-header">
+            <h1 class="display-4">Track Your Order</h1>
+            <p class="lead">Enter your order ID or tracking number to get real-time updates</p>
+        </div>
+
+        <!-- Tracking Form -->
+        <div class="tracking-form">
+            <form id="trackingForm">
+                <div class="row align-items-end">
+                    <div class="col-md-8">
+                        <label for="trackingInput" class="form-label">Order ID or Tracking Number</label>
+                        <input type="text" class="form-control" id="trackingInput" 
+                               placeholder="Enter your order ID or AWB number" required>
+                        <small class="form-text text-muted">
+                            You can find this in your order confirmation email
+                        </small>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <button type="submit" class="btn track-btn w-100">
+                            <i class="fas fa-search"></i> Track Order
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div class="loading-spinner" id="loadingSpinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Fetching your order details...</p>
+        </div>
+
+        <!-- Error Message -->
+        <div class="error-message" id="errorMessage">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Error:</strong> <span id="errorText"></span>
+        </div>
+
+        <!-- Success Message -->
+        <div class="success-message" id="successMessage">
+            <i class="fas fa-check-circle"></i>
+            <strong>Success:</strong> <span id="successText"></span>
+        </div>
+
+        <!-- Tracking Results -->
+        <div class="tracking-results" id="trackingResults">
+            <h4>Order Tracking Information</h4>
+            
+            <!-- Order Details -->
+            <div class="order-details" id="orderDetails">
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Order ID:</strong> <span id="orderId">-</span><br>
+                        <strong>AWB Number:</strong> <span id="awbNumber">-</span>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Courier:</strong> <span id="courierName">-</span><br>
+                        <strong>Expected Delivery:</strong> <span id="expectedDelivery">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Status -->
+            <div class="tracking-status" id="currentStatus">
+                <div class="status-icon status-pending">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div>
+                    <h5 id="statusText">Order Status</h5>
+                    <p class="text-muted mb-0" id="statusDescription">Checking status...</p>
+                </div>
+            </div>
+
+            <!-- Tracking Timeline -->
+            <div class="tracking-timeline" id="trackingTimeline">
+                <!-- Timeline items will be populated here -->
+            </div>
+        </div>
+
+        <!-- Tracking Information -->
+        <div class="alert alert-info mt-4">
+            <i class="fas fa-info-circle"></i>
+            <strong>Live Tracking:</strong> This system shows real Shiprocket tracking data for your orders. 
+            You can track using:
+            <ul class="mb-0 mt-2">
+                <li><strong>Shipment ID</strong> (e.g., 929333039)</li>
+                <li><strong>AWB Number</strong> (when assigned by courier)</li>
+                <li><strong>Order ID</strong> (your custom order reference)</li>
+            </ul>
+        </div>
+
+        <!-- DTDC Tracking Link -->
+        <div class="alert alert-warning mt-3">
+            <i class="fas fa-truck"></i>
+            <strong>DTDC Tracking:</strong> For shipments sent via DTDC courier, use our dedicated 
+            <a href="dtdc-track.html" class="fw-bold text-decoration-none">DTDC Tracking Page</a> 
+            to track your AWB/Consignment numbers.
+        </div>
+
+        <!-- Demo AWB Numbers -->
+        <div class="alert alert-success mt-3">
+            <i class="fas fa-flask"></i>
+            <strong>Try Demo Tracking:</strong> Test the tracking system with these working AWB numbers:
+            <div class="row mt-2">
+                <div class="col-md-4">
+                    <small class="fw-bold">Delivered Order:</small><br>
+                    <code style="cursor: pointer;" onclick="document.getElementById('trackingInput').value='141123858510862'; document.getElementById('trackingForm').dispatchEvent(new Event('submit'));">141123858510862</code>
+                </div>
+                <div class="col-md-4">
+                    <small class="fw-bold">In Transit:</small><br>
+                    <code style="cursor: pointer;" onclick="document.getElementById('trackingInput').value='789456123654987'; document.getElementById('trackingForm').dispatchEvent(new Event('submit'));">789456123654987</code>
+                </div>
+                <div class="col-md-4">
+                    <small class="fw-bold">Just Created:</small><br>
+                    <code style="cursor: pointer;" onclick="document.getElementById('trackingInput').value='555666777888999'; document.getElementById('trackingForm').dispatchEvent(new Event('submit'));">555666777888999</code>
+                </div>
+            </div>
+            <small class="text-muted mt-2 d-block"><i class="fas fa-click"></i> Click any AWB number above to test tracking</small>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const trackingForm = document.getElementById('trackingForm');
+            const trackingInput = document.getElementById('trackingInput');
+            
+            // Check for tracking parameter in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const trackingParam = urlParams.get('tracking');
+            if (trackingParam) {
+                trackingInput.value = trackingParam;
+                // Auto-track after a short delay
+                setTimeout(() => {
+                    trackOrder(trackingParam);
+                }, 500);
+            }
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            const trackingResults = document.getElementById('trackingResults');
+
+            // Handle form submission
+            trackingForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const trackingId = trackingInput.value.trim();
+                if (!trackingId) {
+                    showError('Please enter a valid tracking ID');
+                    return;
+                }
+
+                await trackOrder(trackingId);
+            });
+
+            // Track order function
+            async function trackOrder(trackingId) {
+                try {
+                    showLoading(true);
+                    hideMessages();
+
+                    console.log('Tracking order:', trackingId);
+
+                    const response = await fetch(`/.netlify/functions/shiprocket-track-order/${trackingId}`);
+                    const result = await response.json();
+
+                    console.log('Tracking result:', result);
+
+                    if (result.success) {
+                        // Check for Shiprocket's "no shipment present" error FIRST
+                        if (result.data && result.data.tracking_data && result.data.tracking_data.error) {
+                            const shiprocketError = result.data.tracking_data.error;
+                            if (shiprocketError.includes('no shipment present') || shiprocketError.includes('Aahh!')) {
+                                throw new Error(`Tracking ID "${trackingId}" not found in shipping system. The shipment may not exist or hasn't been processed yet.`);
+                            }
+                        }
+                        
+                        if (result.isTestData) {
+                            // Handle test tracking IDs (like TEST123)
+                            displayTestResults(result.data, trackingId);
+                            showSuccess('Test tracking data retrieved');
+                        } else {
+                            // Handle real Shiprocket tracking data
+                            displayRealTrackingResults(result.data, trackingId);
+                            showSuccess('Real tracking information retrieved successfully');
+                        }
+                    } else {
+                        // Handle different types of errors
+                        if (result.requiresSetup) {
+                            throw new Error('Shiprocket credentials not configured. Please contact support for setup assistance.');
+                        } else if (result.error === 'AWB not found') {
+                            throw new Error(`Tracking ID "${trackingId}" not found in Shiprocket system. Please verify the tracking number.`);
+                        } else {
+                            throw new Error(result.message || result.error || 'Failed to track order');
+                        }
+                    }
+
+                } catch (error) {
+                    console.error('Error tracking order:', error);
+                    showError(error.message || 'Failed to track order. Please try again.');
+                } finally {
+                    showLoading(false);
+                }
+            }
+
+            // Display real Shiprocket tracking results
+            function displayRealTrackingResults(data, trackingId) {
+                console.log('Displaying real Shiprocket tracking results:', data);
+
+                // Extract real Shiprocket data
+                const trackingData = data.tracking_data || {};
+                const shipmentTrack = trackingData.shipment_track || [];
+                
+                // Update order details with real data
+                document.getElementById('orderId').textContent = trackingId;
+                document.getElementById('awbNumber').textContent = trackingData.awb_code || 'AWB Pending';
+                document.getElementById('courierName').textContent = trackingData.courier_name || 'Courier TBD';
+                document.getElementById('expectedDelivery').textContent = trackingData.edd || 'Calculating...';
+
+                // Update current status with real Shiprocket status
+                const statusElement = document.getElementById('currentStatus');
+                const statusIcon = statusElement.querySelector('.status-icon');
+                const statusText = document.getElementById('statusText');
+                const statusDescription = document.getElementById('statusDescription');
+
+                const currentStatus = trackingData.current_status || trackingData.track_status || 'Order Created';
+                statusText.textContent = currentStatus;
+                statusDescription.textContent = trackingData.track_status_description || 'Processing your shipment';
+
+                // Update status icon based on real status
+                statusIcon.className = 'status-icon';
+                const statusLower = currentStatus.toLowerCase();
+                if (statusLower.includes('delivered')) {
+                    statusIcon.classList.add('status-delivered');
+                    statusIcon.innerHTML = '<i class="fas fa-check"></i>';
+                } else if (statusLower.includes('transit') || statusLower.includes('shipped') || statusLower.includes('out for delivery')) {
+                    statusIcon.classList.add('status-in-transit');
+                    statusIcon.innerHTML = '<i class="fas fa-truck"></i>';
+                } else if (statusLower.includes('returned') || statusLower.includes('cancelled')) {
+                    statusIcon.classList.add('status-returned');
+                    statusIcon.innerHTML = '<i class="fas fa-undo"></i>';
+                } else {
+                    statusIcon.classList.add('status-pending');
+                    statusIcon.innerHTML = '<i class="fas fa-clock"></i>';
+                }
+
+                // Update timeline with real tracking events
+                updateRealTimeline(shipmentTrack);
+
+                // Show results
+                trackingResults.style.display = 'block';
+            }
+
+            // Display test results (for TEST123 etc.)
+            function displayTestResults(data, trackingId) {
+                console.log('Displaying test tracking results:', data);
+
+                // Update order details
+                document.getElementById('orderId').textContent = trackingId + ' (TEST)';
+                document.getElementById('awbNumber').textContent = 'TEST-AWB-123456';
+                document.getElementById('courierName').textContent = 'Test Courier';
+                document.getElementById('expectedDelivery').textContent = 'Test Date';
+
+                // Update current status
+                const statusElement = document.getElementById('currentStatus');
+                const statusIcon = statusElement.querySelector('.status-icon');
+                const statusText = document.getElementById('statusText');
+                const statusDescription = document.getElementById('statusDescription');
+
+                statusText.textContent = 'Test Status';
+                statusDescription.textContent = 'This is test tracking data';
+
+                statusIcon.className = 'status-icon status-pending';
+                statusIcon.innerHTML = '<i class="fas fa-flask"></i>';
+
+                // Update timeline with test data
+                updateTimeline([{
+                    current_status: 'Test Status',
+                    activity: 'Test tracking activity',
+                    date: new Date().toISOString(),
+                    location: 'Test Location'
+                }]);
+
+                // Show results
+                trackingResults.style.display = 'block';
+            }
+
+            // Update tracking timeline with real Shiprocket data
+            function updateRealTimeline(trackingEvents) {
+                const timeline = document.getElementById('trackingTimeline');
+                timeline.innerHTML = '';
+
+                if (trackingEvents && trackingEvents.length > 0) {
+                    // Reverse to show latest first
+                    trackingEvents.slice().reverse().forEach(event => {
+                        const timelineItem = document.createElement('div');
+                        timelineItem.className = 'timeline-item';
+                        
+                        timelineItem.innerHTML = `
+                            <div class="timeline-content">
+                                <h6>${event.current_status || event.activity || 'Status Update'}</h6>
+                                <p class="mb-1">${event.sr_status_label || event.message || 'Shipment update'}</p>
+                                <small class="text-muted">
+                                    ${event.date ? new Date(event.date).toLocaleString() : 'Date not available'} 
+                                    ${event.location ? '• ' + event.location : ''}
+                                </small>
+                            </div>
+                        `;
+                        
+                        timeline.appendChild(timelineItem);
+                    });
+                } else {
+                    // Show default timeline item for new orders
+                    const timelineItem = document.createElement('div');
+                    timelineItem.className = 'timeline-item';
+                    timelineItem.innerHTML = `
+                        <div class="timeline-content">
+                            <h6>Order Created</h6>
+                            <p class="mb-1">Your order has been successfully created and is being processed</p>
+                            <small class="text-muted">${new Date().toLocaleString()}</small>
+                        </div>
+                    `;
+                    timeline.appendChild(timelineItem);
+                }
+            }
+
+            // Update tracking timeline (legacy function for test data)
+            function updateTimeline(trackingEvents) {
+                updateRealTimeline(trackingEvents);
+            }
+
+            // Utility functions
+            function showLoading(show) {
+                loadingSpinner.style.display = show ? 'block' : 'none';
+            }
+
+            function showError(message) {
+                document.getElementById('errorText').textContent = message;
+                errorMessage.style.display = 'block';
+                trackingResults.style.display = 'none';
+            }
+
+            function showSuccess(message) {
+                document.getElementById('successText').textContent = message;
+                successMessage.style.display = 'block';
+            }
+
+            function hideMessages() {
+                errorMessage.style.display = 'none';
+                successMessage.style.display = 'none';
+                trackingResults.style.display = 'none';
+            }
+
+            // Test connection button (for development)
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                const testButton = document.createElement('button');
+                testButton.className = 'btn btn-outline-primary btn-sm mt-3';
+                testButton.innerHTML = '<i class="fas fa-flask"></i> Test Connection';
+                testButton.onclick = testConnection;
+                document.querySelector('.tracking-form').appendChild(testButton);
+            }
+
+            async function testConnection() {
+                try {
+                    showLoading(true);
+                    const response = await fetch('/api/shipping/test-connection');
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        showSuccess('Shiprocket connection successful! Test mode active.');
+                    } else {
+                        showError(result.error || 'Connection test failed');
+                    }
+                } catch (error) {
+                    showError('Failed to test connection: ' + error.message);
+                } finally {
+                    showLoading(false);
+                }
+            }
+        });
+    </script>
+
+    <!-- WhatsApp Button -->
+    <a href="https://wa.me/919310250047?text=Hi! I need help tracking my order. Can you assist me?" class="whatsapp-btn" onclick="openWhatsAppChat()">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <script>
+        function openWhatsAppChat() {
+            // Open WhatsApp with pre-filled message
+            window.open('https://wa.me/919310250047?text=Hi! I need help tracking my order. Can you assist me?', '_blank');
+        }
+    </script>
+</body>
+</html>

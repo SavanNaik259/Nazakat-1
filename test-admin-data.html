@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Data Loading</title>
+</head>
+<body>
+    <h1>Admin Data Loading Test</h1>
+    <div id="test-results"></div>
+    
+    <script>
+        async function testDataLoading() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '<p>Testing data loading...</p>';
+            
+            try {
+                // Test the same endpoint that admin-professional-final.html uses
+                const categories = ['featured-collection', 'new-arrivals', 'saree-collection'];
+                let totalProducts = 0;
+                let totalValue = 0;
+                let categoryResults = [];
+                
+                for (const category of categories) {
+                    try {
+                        console.log(`Testing category: ${category}`);
+                        const response = await fetch(`/.netlify/functions/load-products?category=${category}&cacheBust=${Date.now()}`);
+                        const data = await response.json();
+                        
+                        console.log(`Response for ${category}:`, data);
+                        
+                        if (data.success && data.products) {
+                            totalProducts += data.products.length;
+                            totalValue += data.products.reduce((sum, product) => {
+                                return sum + (parseFloat(product.price) || 0);
+                            }, 0);
+                            
+                            categoryResults.push(`✅ ${category}: ${data.products.length} products`);
+                        } else {
+                            categoryResults.push(`❌ ${category}: Failed - ${data.error || 'Unknown error'}`);
+                        }
+                    } catch (error) {
+                        console.error(`Error loading ${category}:`, error);
+                        categoryResults.push(`❌ ${category}: Network error - ${error.message}`);
+                    }
+                }
+                
+                results.innerHTML = `
+                    <h2>Test Results:</h2>
+                    <p><strong>Total Products:</strong> ${totalProducts}</p>
+                    <p><strong>Total Value:</strong> ₹${totalValue.toLocaleString('en-IN')}</p>
+                    <h3>Category Details:</h3>
+                    <ul>
+                        ${categoryResults.map(result => `<li>${result}</li>`).join('')}
+                    </ul>
+                `;
+                
+            } catch (error) {
+                console.error('Test failed:', error);
+                results.innerHTML = `<p style="color: red;">Test failed: ${error.message}</p>`;
+            }
+        }
+        
+        // Run test when page loads
+        document.addEventListener('DOMContentLoaded', testDataLoading);
+    </script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Netlify CDN Test</title>
+</head>
+<body>
+    <h1>Netlify CDN Testing Tool</h1>
+    
+    <div id="results"></div>
+    <button onclick="testProductsCDN()">Test Products CDN</button>
+    <button onclick="testImagesCDN()">Test Images CDN</button>
+    <button onclick="testFromDifferentRegion()">Test Cache Hit</button>
+
+    <script>
+    async function testProductsCDN() {
+        const results = document.getElementById('results');
+        results.innerHTML = '<h3>Testing Products CDN...</h3>';
+        
+        // First request
+        const start1 = performance.now();
+        const response1 = await fetch('/.netlify/functions/load-products?category=bridal');
+        const end1 = performance.now();
+        
+        // Second request (should hit Netlify CDN)
+        const start2 = performance.now();
+        const response2 = await fetch('/.netlify/functions/load-products?category=bridal');
+        const end2 = performance.now();
+        
+        const cacheControl1 = response1.headers.get('cache-control');
+        const cacheControl2 = response2.headers.get('cache-control');
+        const age1 = response1.headers.get('age') || '0';
+        const age2 = response2.headers.get('age') || '0';
+        
+        results.innerHTML += `
+            <h4>Products CDN Test Results:</h4>
+            <p>First Request: ${(end1-start1).toFixed(2)}ms | Age: ${age1}s | Cache: ${cacheControl1}</p>
+            <p>Second Request: ${(end2-start2).toFixed(2)}ms | Age: ${age2}s | Cache: ${cacheControl2}</p>
+            <p><strong>CDN Status: ${parseInt(age2) > parseInt(age1) ? '✅ CDN HIT' : '❌ CDN MISS'}</strong></p>
+            <p><strong>Performance: ${end2 < end1 ? '✅ Faster' : '⚠️ Same speed'}</strong></p>
+        `;
+    }
+    
+    async function testImagesCDN() {
+        const results = document.getElementById('results');
+        results.innerHTML += '<h3>Testing Images CDN...</h3>';
+        
+        // Test with a sample image path
+        const imagePath = 'productImages/sample.jpg';
+        
+        // First request
+        const start1 = performance.now();
+        const response1 = await fetch(`/.netlify/functions/image-proxy?path=${imagePath}`);
+        const end1 = performance.now();
+        
+        // Second request (should hit Netlify CDN)
+        const start2 = performance.now();
+        const response2 = await fetch(`/.netlify/functions/image-proxy?path=${imagePath}`);
+        const end2 = performance.now();
+        
+        const age1 = response1.headers.get('age') || '0';
+        const age2 = response2.headers.get('age') || '0';
+        const cacheControl1 = response1.headers.get('cache-control');
+        
+        results.innerHTML += `
+            <h4>Images CDN Test Results:</h4>
+            <p>First Request: ${(end1-start1).toFixed(2)}ms | Age: ${age1}s</p>
+            <p>Second Request: ${(end2-start2).toFixed(2)}ms | Age: ${age2}s</p>
+            <p>Cache-Control: ${cacheControl1}</p>
+            <p><strong>CDN Status: ${parseInt(age2) > parseInt(age1) ? '✅ CDN HIT' : '❌ CDN MISS'}</strong></p>
+        `;
+    }
+    
+    function testFromDifferentRegion() {
+        alert('Open this same page in an incognito window or different browser. If responses are fast (~50ms) with Age > 0, Netlify CDN is working!');
+    }
+    </script>
+</body>
+</html>

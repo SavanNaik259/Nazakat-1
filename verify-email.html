@@ -1,0 +1,195 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Email - Nazakat</title>
+    <link rel="stylesheet" href="css/auth.css">
+    <style>
+        .verification-container {
+            max-width: 500px;
+            margin: 100px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #d4af37;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .success-message {
+            color: #28a745;
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        .login-button {
+            background-color: #d4af37;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+        .login-button:hover {
+            background-color: #b8941f;
+        }
+    </style>
+</head>
+<body>
+    <div class="verification-container">
+        <h2>Email Verification</h2>
+        
+        <div id="loading" class="loading-state">
+            <div class="loading-spinner"></div>
+            <p>Verifying your email address...</p>
+        </div>
+
+        <div id="success" class="success-state" style="display: none;">
+            <div class="success-message">
+                ✅ Email verified successfully!
+            </div>
+            <p>Your account has been verified. You can now log in to access your profile and place orders.</p>
+            <a href="login.html" class="login-button">Go to Login</a>
+            <p style="margin-top: 15px; font-size: 14px; color: #666;">You will be redirected to the login page in <span id="countdown">5</span> seconds...</p>
+        </div>
+
+        <div id="error" class="error-state" style="display: none;">
+            <div class="error-message">
+                ❌ Verification failed
+            </div>
+            <p id="error-message">Invalid or expired verification link.</p>
+            <a href="signup.html" class="login-button">Create New Account</a>
+        </div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
+            authDomain: "auric-a0c92.firebaseapp.com",
+            projectId: "auric-a0c92",
+            storageBucket: "auric-a0c92.firebasestorage.app",
+            messagingSenderId: "878979958342",
+            appId: "1:878979958342:web:e6092f7522488d21eaec47",
+            measurementId: "G-ZYZ0WQXRFX"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+    </script>
+    
+    <script src="js/firebase/firebase-init.js"></script>
+    <script src="js/firebase/firebase-auth.js"></script>
+
+    <script>
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        const email = urlParams.get('email');
+
+        const loadingDiv = document.getElementById('loading');
+        const successDiv = document.getElementById('success');
+        const errorDiv = document.getElementById('error');
+        const errorMessage = document.getElementById('error-message');
+
+        async function verifyEmail() {
+            if (!token || !email) {
+                showError('Invalid verification link. Missing token or email.');
+                return;
+            }
+
+            try {
+                const result = await FirebaseAuth.verifyEmailWithToken(token, email);
+                
+                if (result.success) {
+                    showSuccess();
+                } else {
+                    showError(result.error);
+                }
+            } catch (error) {
+                console.error('Verification error:', error);
+                showError('An error occurred during verification. Please try again.');
+            }
+        }
+
+        function showSuccess() {
+            loadingDiv.style.display = 'none';
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'block';
+            
+            // Auto-redirect to login page after 5 seconds
+            let countdown = 5;
+            const countdownElement = document.getElementById('countdown');
+            
+            const timer = setInterval(() => {
+                countdown--;
+                if (countdownElement) {
+                    countdownElement.textContent = countdown;
+                }
+                
+                if (countdown <= 0) {
+                    clearInterval(timer);
+                    window.location.href = 'login.html';
+                }
+            }, 1000);
+        }
+
+        function showError(message) {
+            loadingDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            errorMessage.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // Start verification when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            // Wait for Firebase Auth module to initialize properly
+            let initAttempts = 0;
+            const maxAttempts = 10;
+            
+            function waitForFirebaseAuth() {
+                if (typeof FirebaseAuth !== 'undefined' && FirebaseAuth.verifyEmailWithToken) {
+                    console.log('Firebase Auth module ready, starting verification');
+                    verifyEmail();
+                } else if (initAttempts < maxAttempts) {
+                    initAttempts++;
+                    console.log(`Waiting for Firebase Auth module... (attempt ${initAttempts})`);
+                    setTimeout(waitForFirebaseAuth, 500);
+                } else {
+                    console.error('Firebase Auth module failed to initialize');
+                    showError('Failed to initialize verification system. Please try again later.');
+                }
+            }
+            
+            waitForFirebaseAuth();
+        });
+    </script>
+</body>
+</html>

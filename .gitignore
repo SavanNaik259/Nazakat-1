@@ -1,0 +1,18 @@
+node_modules
+dist
+.DS_Store
+server/public
+vite.config.ts.*
+*.tar.gz
+
+# Large assets that should not be in Git
+attached_assets/
+*.jpg
+*.png
+*.mp4
+*.zip
+
+# Temporary files
+*.tmp
+*.temp
+.env.local

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PIN Code Validation Test</title>
+</head>
+<body>
+    <h1>Real PIN Code Validation Test</h1>
+    <div id="test-results"></div>
+
+    <script>
+        // Copy the validation function for testing
+        async function validatePinCodeAPI(pinCode) {
+            try {
+                console.log(`Testing PIN code: ${pinCode}`);
+                const response = await fetch(`https://api.postalpincode.in/pincode/${pinCode}`);
+                const data = await response.json();
+                
+                if (data && data[0] && data[0].Status === 'Success') {
+                    const postOffice = data[0].PostOffice[0];
+                    return {
+                        valid: true,
+                        district: postOffice.District,
+                        state: postOffice.State,
+                        city: postOffice.Name,
+                        region: postOffice.Region
+                    };
+                } else {
+                    return {
+                        valid: false,
+                        error: 'PIN code not found in postal database'
+                    };
+                }
+            } catch (error) {
+                console.warn('PIN code validation API failed:', error);
+                return {
+                    valid: true,
+                    fallback: true,
+                    error: 'Could not validate PIN code - API unavailable'
+                };
+            }
+        }
+
+        async function testPinCodes() {
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = '<p>Testing real PIN codes...</p>';
+            
+            // Test cases
+            const testCases = [
+                { pin: '333333', expectedState: 'Rajasthan' },
+                { pin: '560001', expectedState: 'Karnataka' },
+                { pin: '110001', expectedState: 'Delhi' },
+                { pin: '123456', expectedState: 'Invalid' } // This should fail
+            ];
+            
+            for (const testCase of testCases) {
+                const result = await validatePinCodeAPI(testCase.pin);
+                
+                let resultHtml = `<div style="margin: 10px 0; padding: 10px; border: 1px solid #ccc;">`;
+                resultHtml += `<strong>PIN: ${testCase.pin}</strong><br>`;
+                
+                if (result.valid && !result.fallback) {
+                    resultHtml += `<span style="color: green;">✅ VALID</span><br>`;
+                    resultHtml += `State: ${result.state}<br>`;
+                    resultHtml += `District: ${result.district}<br>`;
+                    resultHtml += `City: ${result.city}<br>`;
+                    
+                    if (testCase.expectedState !== 'Invalid' && result.state.toLowerCase() === testCase.expectedState.toLowerCase()) {
+                        resultHtml += `<span style="color: green;">✅ State matches expectation</span>`;
+                    } else if (testCase.expectedState !== 'Invalid') {
+                        resultHtml += `<span style="color: orange;">⚠️ Expected ${testCase.expectedState}, got ${result.state}</span>`;
+                    }
+                } else if (result.fallback) {
+                    resultHtml += `<span style="color: orange;">⚠️ API unavailable</span><br>`;
+                    resultHtml += `Error: ${result.error}`;
+                } else {
+                    resultHtml += `<span style="color: red;">❌ INVALID</span><br>`;
+                    resultHtml += `Error: ${result.error}`;
+                }
+                
+                resultHtml += `</div>`;
+                resultsDiv.innerHTML += resultHtml;
+            }
+        }
+
+        // Run test when page loads
+        window.onload = testPinCodes;
+    </script>
+</body>
+</html>

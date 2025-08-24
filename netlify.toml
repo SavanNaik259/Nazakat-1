@@ -1,0 +1,59 @@
+[build]
+  # Directory with the built static site
+  publish = "."
+  # Your build command - install function dependencies
+  command = "cd netlify/functions && npm install --production"
+  # Directory with Netlify Functions
+  functions = "netlify/functions"
+
+# Auto-install function dependencies
+[[plugins]]
+  package = "@netlify/plugin-functions-install-core"
+
+# Proxy API requests to Netlify Functions
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+  force = true
+
+# Make sure each HTML page is properly served
+[[redirects]]
+  from = "/checkout.html"
+  to = "/checkout.html"
+  status = 200
+
+[[redirects]]
+  from = "/product-detail.html"
+  to = "/product-detail.html"
+  status = 200
+
+[[redirects]]
+  from = "/login.html"
+  to = "/login.html"
+  status = 200
+
+[[redirects]]
+  from = "/signup.html"
+  to = "/signup.html"
+  status = 200
+
+[[redirects]]
+  from = "/profile.html"
+  to = "/profile.html"
+  status = 200
+
+# Handle direct navigation for SPA as fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[build.environment]
+  EMAIL_SERVICE = "gmail"
+  EMAIL_USER = "auricbysubha.web@gmail.com"
+  EMAIL_PASS = "vjkfsdowgkroszjx"
+  OWNER_EMAIL = "auricbysubha.web@gmail.com"
+
+[functions]
+  node_bundler = "nft"

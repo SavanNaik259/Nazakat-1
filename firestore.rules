@@ -1,0 +1,16 @@
+
+
+
+
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Temporary admin dashboard access - allow all operations for debugging
+    // TODO: Restrict these rules in production
+    match /{document=**} {
+      allow read, write: if true; // TEMPORARY: Allow all access for admin dashboard debugging
+    }
+  }
+}
